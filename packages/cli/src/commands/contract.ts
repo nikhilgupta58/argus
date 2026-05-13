@@ -56,7 +56,25 @@ contractCommand
       process.exit(1);
     }
     const store = getStore();
-    store.save(result.value);
+    try {
+      store.save(result.value);
+    } catch (err: unknown) {
+      store.close();
+      const msg = String(err);
+      if (msg.includes("UNIQUE constraint")) {
+        console.error(
+          pc.yellow(
+            `Contract '${result.value.id}' v${result.value.version} already exists in the store.`,
+          ),
+        );
+        console.error(
+          pc.dim("  Bump the version field in the TOML, then use `argus contract edit` to update."),
+        );
+      } else {
+        console.error(pc.red(`Failed to save contract: ${msg}`));
+      }
+      process.exit(1);
+    }
     store.close();
     console.log(pc.green(`✓ Contract saved: ${result.value.id} v${result.value.version}`));
     console.log(`  hash: ${contractHash(result.value)}`);
