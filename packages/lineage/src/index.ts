@@ -1,2 +1,3 @@
-export * from "./event/types.js";
-export * from "./event/hash.js";
+export * from "./event/index.js";
+export * from "./signing/index.js";
+export * from "./chain/index.js";
