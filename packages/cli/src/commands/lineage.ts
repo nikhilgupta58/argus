@@ -1,6 +1,6 @@
 import { Command } from "commander";
 import { existsSync, mkdirSync, readFileSync } from "node:fs";
-import { resolve, dirname } from "node:path";
+import { resolve, dirname, basename } from "node:path";
 import pc from "picocolors";
 import {
   EventStore,
@@ -21,7 +21,11 @@ function getStore(): EventStore {
 }
 
 function loadPrivKey(tenant: string, passphrase: string): Uint8Array {
-  const path = resolve(KEYS_DIR, `${tenant}.key`);
+  const safeTenant = basename(tenant);
+  if (!safeTenant || safeTenant !== tenant) {
+    throw new Error(`Invalid tenant name: ${tenant}`);
+  }
+  const path = resolve(KEYS_DIR, `${safeTenant}.key`);
   if (!existsSync(path)) throw new Error(`Key file not found: ${path}`);
   const data = readFileSync(path);
   return decryptKeyPair(data, passphrase).privateKey;
@@ -102,6 +106,10 @@ lineageCommand
   .action((contractId: string, fromSeqStr: string, toSeqStr: string) => {
     const fromSeq = parseInt(fromSeqStr, 10);
     const toSeq = parseInt(toSeqStr, 10);
+    if (isNaN(fromSeq) || isNaN(toSeq)) {
+      console.error(pc.red("Error: fromSeq and toSeq must be integers"));
+      process.exit(1);
+    }
     const store = getStore();
     const chain = store.getChain(contractId);
     store.close();
