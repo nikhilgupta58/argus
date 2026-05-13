@@ -1,5 +1,2 @@
-export interface Event {
-  id: string;
-  contractId: string;
-  timestamp: number;
-}
+export * from "./event/types.js";
+export * from "./event/hash.js";

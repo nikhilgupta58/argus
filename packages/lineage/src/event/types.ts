@@ -26,7 +26,7 @@ export interface SignedEvent extends Event {
 export interface EventRecord {
   id: string;
   contract_id: string;
-  action_kind: string;
+  action_kind: ActionKind;
   payload_blake3: string;
   parent_id: string | null;
   timestamp: number;

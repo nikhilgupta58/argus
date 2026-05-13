@@ -1,5 +1,5 @@
 import { describe, it, expect } from "vitest";
-import { eventId } from "../../event/hash.js";
+import { eventId, canonicalEventJson } from "../../event/hash.js";
 import type { Event } from "../../event/types.js";
 
 const BASE: Omit<Event, "id"> = {
@@ -26,5 +26,28 @@ describe("eventId", () => {
     const h3 = eventId({ ...BASE, contract_id: "other" });
     expect(h1).not.toBe(h2);
     expect(h1).not.toBe(h3);
+  });
+
+  it("matches known hash vector", () => {
+    expect(eventId(BASE)).toBe("cc1e8821c446a49ed6bcd020aecd11a6d324c56a9c211657ce1d13c1b8c2e730");
+  });
+});
+
+describe("canonicalEventJson", () => {
+  it("includes all fields including id and sorts keys", () => {
+    const event = { ...BASE, id: "abc123" };
+    const json = canonicalEventJson(event as import("../../event/types.js").Event);
+    const parsed = JSON.parse(json) as Record<string, unknown>;
+    const keys = Object.keys(parsed);
+    expect(keys).toEqual([...keys].sort());
+    expect(parsed["id"]).toBe("abc123");
+    expect(parsed["contract_id"]).toBe("outbound-3-demos");
+  });
+
+  it("is deterministic across calls", () => {
+    const event = { ...BASE, id: "abc123" };
+    const j1 = canonicalEventJson(event as import("../../event/types.js").Event);
+    const j2 = canonicalEventJson(event as import("../../event/types.js").Event);
+    expect(j1).toBe(j2);
   });
 });
