@@ -1,17 +1,26 @@
 import { Command } from "commander";
 import { readFileSync, writeFileSync, existsSync, mkdirSync } from "node:fs";
-import { resolve } from "node:path";
+import { resolve, basename } from "node:path";
 import pc from "picocolors";
 import { generateKeyPair, encryptKeyPair, decryptKeyPair, keyPairToHex } from "@argus/lineage";
 
 const KEYS_DIR = process.env["ARGUS_KEYS_DIR"] ?? `${process.env["HOME"]}/.argus/keys`;
 
+function sanitizeTenant(tenant: string): string {
+  const safe = basename(tenant);
+  if (!safe || safe !== tenant || safe.includes("/") || safe.includes("\\")) {
+    console.error(pc.red("Error: tenant name must not contain path separators"));
+    process.exit(1);
+  }
+  return safe;
+}
+
 function keyPath(tenant: string): string {
-  return resolve(KEYS_DIR, `${tenant}.key`);
+  return resolve(KEYS_DIR, `${sanitizeTenant(tenant)}.key`);
 }
 
 function pubPath(tenant: string): string {
-  return resolve(KEYS_DIR, `${tenant}.pub`);
+  return resolve(KEYS_DIR, `${sanitizeTenant(tenant)}.pub`);
 }
 
 function ensureKeysDir(): void {
