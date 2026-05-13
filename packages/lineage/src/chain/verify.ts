@@ -46,6 +46,20 @@ export function verifyChain(events: SignedEvent[]): VerificationResult {
     errors.push(`Genesis event (seq 0) has non-null parent_id: ${sorted[0]!.parent_id}`);
   }
 
+  // Check sequence starts at 0
+  if (sorted[0]!.sequence !== 0) {
+    errors.push(`Chain does not start at sequence 0: first sequence is ${sorted[0]!.sequence}`);
+  }
+
+  // Check sequences are contiguous
+  for (let i = 1; i < sorted.length; i++) {
+    const prev = sorted[i - 1]!;
+    const curr = sorted[i]!;
+    if (curr.sequence !== prev.sequence + 1) {
+      errors.push(`Non-contiguous sequence at index ${i}: expected ${prev.sequence + 1}, got ${curr.sequence}`);
+    }
+  }
+
   for (let i = 0; i < sorted.length; i++) {
     const ev = sorted[i]!;
     const { id, signature, public_key, ...rest } = ev;

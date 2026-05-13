@@ -39,6 +39,9 @@ keysCommand
       console.error(pc.red("Error: --passphrase required (or set ARGUS_PASSPHRASE env var)"));
       process.exit(1);
     }
+    if (opts.passphrase) {
+      console.warn(pc.yellow("  Warning: passing --passphrase on the command line may expose it in shell history. Prefer ARGUS_PASSPHRASE env var."));
+    }
     if (existsSync(keyPath(tenant))) {
       console.error(pc.red(`Key for '${tenant}' already exists. Use 'rotate' to replace it.`));
       process.exit(1);
@@ -64,6 +67,9 @@ keysCommand
     if (!passphrase) {
       console.error(pc.red("Error: --passphrase required"));
       process.exit(1);
+    }
+    if (opts.passphrase) {
+      console.warn(pc.yellow("  Warning: passing --passphrase on the command line may expose it in shell history. Prefer ARGUS_PASSPHRASE env var."));
     }
     ensureKeysDir();
     const existing = keyPath(tenant);

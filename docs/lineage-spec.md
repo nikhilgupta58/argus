@@ -111,9 +111,11 @@ signature = Ed25519_sign(
 ### Key storage
 
 Private keys should be encrypted at rest. The reference implementation uses:
-- PBKDF2-SHA256 (100,000 iterations) for key derivation from passphrase
-- XChaCha20-Poly1305 for private key encryption
+- PBKDF2-SHA256 for key derivation from passphrase
+- XChaCha20-Poly1305 for private key encryption with AAD binding
 - Format: `version(4 bytes LE) || pbkdf2_salt(32) || xchacha_nonce(24) || encrypted_key(48)` = 108 bytes
+- Version 1: 100,000 PBKDF2 iterations, no AAD (legacy)
+- Version 2 (current): 600,000 PBKDF2 iterations, AAD = version(4) + salt(32)
 
 ---
 
