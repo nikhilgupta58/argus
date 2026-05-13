@@ -31,10 +31,9 @@ No cloud required. Runs on your machine. Your data stays yours.
 ## Quick start
 
 ```bash
-# Install from source (see Install section below for binaries)
+# Install from source (see Install section below for pre-built binaries)
 git clone https://github.com/nikhilgupta58/argus.git
-cd argus && bun install
-cd packages/cli && bun link && cd ../..   # makes `argus` available globally
+cd argus && bun install && make install-local   # compiles argus to ~/.bun/bin/
 
 # Create your first outcome contract (interactive)
 argus init
@@ -189,13 +188,14 @@ argus --version
 ```bash
 git clone https://github.com/nikhilgupta58/argus.git
 cd argus && bun install
-cd packages/cli && bun link    # registers the `argus` bin in ~/.bun/bin/
 
-# Make sure ~/.bun/bin is on your PATH (add to ~/.zshrc or ~/.bashrc if needed)
-export PATH="$HOME/.bun/bin:$PATH"
+# Build a self-contained binary and put it on PATH
+make install-local
 
 argus --help
 ```
+
+`make install-local` compiles a standalone binary to `~/.bun/bin/argus`. Make sure `~/.bun/bin` is on your PATH (Bun's installer adds this automatically; if not, add `export PATH="$HOME/.bun/bin:$PATH"` to your `~/.zshrc`).
 
 Run the test suite:
 
