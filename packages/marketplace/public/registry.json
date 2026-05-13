@@ -1,0 +1,29 @@
+[
+  {
+    "slug": "outbound-sales",
+    "name": "outbound",
+    "version": "1.0.0",
+    "description": "Drafts personalised outbound sales sequences based on an Outbound contract.",
+    "publisher": "Argus Core Team",
+    "contractKinds": ["outbound"],
+    "githubUrl": "https://github.com/nikhilgupta58/argus/tree/main/packages/specialists/src/specialists/outbound"
+  },
+  {
+    "slug": "weekly-report",
+    "name": "weekly-report",
+    "version": "1.0.0",
+    "description": "Generates a weekly status report from structured data sources.",
+    "publisher": "Argus Core Team",
+    "contractKinds": ["report"],
+    "githubUrl": "https://github.com/nikhilgupta58/argus/tree/main/packages/specialists/src/specialists/weekly-report"
+  },
+  {
+    "slug": "pr-review",
+    "name": "pr-review",
+    "version": "1.0.0",
+    "description": "Reviews GitHub pull requests and enforces SLA contracts.",
+    "publisher": "Argus Core Team",
+    "contractKinds": ["pr-review"],
+    "githubUrl": "https://github.com/nikhilgupta58/argus/tree/main/packages/specialists/src/specialists/pr-review"
+  }
+]

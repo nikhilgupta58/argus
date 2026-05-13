@@ -1,0 +1,41 @@
+---
+import registry from "../../public/registry.json";
+---
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Argus Marketplace</title>
+  <style>
+    body { font-family: system-ui, sans-serif; max-width: 800px; margin: 0 auto; padding: 2rem; }
+    h1 { font-size: 2rem; }
+    .specialist-card { border: 1px solid #ddd; border-radius: 8px; padding: 1rem; margin: 1rem 0; }
+    .specialist-card h2 { margin-top: 0; font-size: 1.2rem; }
+    .badge { background: #e0f0ff; border-radius: 4px; padding: 2px 6px; font-size: 0.8rem; margin-right: 4px; }
+    .meta { color: #666; font-size: 0.9rem; margin: 0.5rem 0; }
+    a { color: #0066cc; }
+  </style>
+</head>
+<body>
+  <h1>Argus Marketplace</h1>
+  <p>Verified specialist bundles for Argus agents. All specialists are signed by their publisher — verify with <code>argus fleet install-bundle</code>.</p>
+
+  {registry.map((specialist) => (
+    <div class="specialist-card">
+      <h2>
+        <a href={`/specialists/${specialist.slug}`}>{specialist.name}</a>
+        <span class="badge">v{specialist.version}</span>
+      </h2>
+      <p>{specialist.description}</p>
+      <p class="meta">
+        Publisher: {specialist.publisher} &nbsp;|&nbsp;
+        Kinds: {specialist.contractKinds.map((k) => <span class="badge">{k}</span>)}
+        &nbsp;|&nbsp;
+        <a href={specialist.githubUrl} target="_blank" rel="noopener">GitHub</a>
+      </p>
+    </div>
+  ))}
+</body>
+</html>

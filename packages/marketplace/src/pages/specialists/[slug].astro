@@ -1,0 +1,44 @@
+---
+import registry from "../../../public/registry.json";
+
+export function getStaticPaths() {
+  return registry.map((specialist) => ({
+    params: { slug: specialist.slug },
+    props: { specialist },
+  }));
+}
+
+const { specialist } = Astro.props;
+---
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>{specialist.name} — Argus Marketplace</title>
+  <style>
+    body { font-family: system-ui, sans-serif; max-width: 800px; margin: 0 auto; padding: 2rem; }
+    .badge { background: #e0f0ff; border-radius: 4px; padding: 2px 6px; font-size: 0.8rem; margin-right: 4px; }
+    .back { color: #0066cc; }
+    code { background: #f4f4f4; padding: 2px 6px; border-radius: 4px; }
+    pre { background: #f4f4f4; padding: 1rem; border-radius: 8px; overflow-x: auto; }
+  </style>
+</head>
+<body>
+  <p><a class="back" href="/">&larr; Marketplace</a></p>
+  <h1>{specialist.name} <span class="badge">v{specialist.version}</span></h1>
+  <p>{specialist.description}</p>
+
+  <table>
+    <tr><td><strong>Publisher</strong></td><td>{specialist.publisher}</td></tr>
+    <tr><td><strong>Contract kinds</strong></td><td>{specialist.contractKinds.join(", ")}</td></tr>
+    <tr><td><strong>Source</strong></td><td><a href={specialist.githubUrl} target="_blank" rel="noopener">GitHub</a></td></tr>
+  </table>
+
+  <h2>Install</h2>
+  <pre><code>argus fleet install-bundle {specialist.name}-{specialist.version}.tar.gz</code></pre>
+
+  <p>Bundles are verified on install: the Ed25519 signature is checked against the publisher public key, and the bundle hash is checked against the revocation list.</p>
+</body>
+</html>
