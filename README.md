@@ -6,14 +6,18 @@
 [![CI](https://img.shields.io/github/actions/workflow/status/nikhilgupta58/argus/ci.yml?branch=main&label=CI)](https://github.com/nikhilgupta58/argus/actions)
 [![Release](https://img.shields.io/github/v/release/nikhilgupta58/argus?label=release)](https://github.com/nikhilgupta58/argus/releases/latest)
 
-Argus is an open-source runtime for outcome-owning AI agents. Each agent operates under a signed **Outcome Contract** that defines success criteria, budget, and escalation rules. Every action is recorded in a tamper-evident **lineage ledger** — Ed25519-signed, BLAKE3 content-addressed, and independently replayable. Argus agents compose into specialist fleets and run without any cloud dependency.
+Argus is an open-source runtime that makes AI agents **accountable**.
+
+You tell Argus what your agent needs to accomplish, set a budget, and define when it should alert you. Argus does the rest: it runs your agent, enforces the budget automatically, pings you if anything needs your attention, and keeps a complete signed record of every action — so you can always see what happened and prove it wasn't tampered with.
+
+No cloud required. Runs on your machine. Your data stays yours.
 
 ---
 
 ## What's Built
 
-### Phase 1 — Contract Layer ✅
-TOML-based Outcome Contracts with Zod schema validation, BLAKE3 content-addressing, and a SQLite append-only store.
+### Phase 1 — Outcome Contracts ✅
+Write down what your agent must achieve, when it must do it, and how much it can spend. Argus validates the contract and stores it safely.
 
 ```bash
 # Create and manage outcome contracts
@@ -23,7 +27,7 @@ argus contract validate ./contracts/outbound-3-demos.toml
 argus contract diff outbound-3-demos 1.0.0 1.1.0
 ```
 
-Contract format:
+Here's what a contract looks like — fill in your goal, deadline, and budget:
 ```toml
 id = "outbound-3-demos"
 version = "1.0.0"
@@ -50,14 +54,14 @@ channel = "slack"
 contact = "#outbound-alerts"
 ```
 
-### Phase 2 — Lineage Ledger ✅
-Ed25519-signed event chain with XChaCha20-Poly1305 key encryption, PBKDF2-SHA256 at 600k iterations, and a standalone chain verifier with zero Argus runtime dependencies.
+### Phase 2 — Signed Action Log ✅
+Every action your agent takes is recorded in a tamper-proof log. If someone alters the record, Argus detects it. Any third party can verify the log without trusting Argus.
 
-### Phase 3 — Fleet Layer ✅
-Content-addressed specialist runtime, cron/webhook initiative engine, budget enforcement, and human-in-the-loop escalation.
+### Phase 3 — Specialist Agents + Daemon ✅
+Specialist agents carry out your contracts automatically. The Argus daemon runs in the background, fires agents on schedule or on events, enforces budget caps, and pings you when contracts need your attention.
 
-### Phase 4 — Marketplace + Trust ✅
-Publisher identity (Ed25519 keypair, local registry), signed specialist bundles (`.tar.gz` + Ed25519 over BLAKE3 manifest), revocation list (SQLite), and a minimal static Astro discovery site.
+### Phase 4 — Marketplace + Bundle Signing ✅
+Publish and discover specialist agents. Every bundle is signed by its publisher — Argus verifies the signature and checks a revocation list before installing, so you know exactly what code you're running.
 
 ```bash
 # Register a publisher identity
@@ -74,7 +78,7 @@ argus fleet install-bundle outbound-1.0.0.tar.gz
 argus marketplace revoke <bundleHash> --reason "security issue"
 ```
 
-Publisher key format: same XChaCha20-Poly1305 + PBKDF2-SHA256 (600k iterations) as lineage keys. Bundle manifests carry an Ed25519 signature over `BLAKE3(canonical JSON of manifest without signature field)`. Every `install-bundle` call verifies the signature and checks the BLAKE3 bundle hash against the revocation list before any code runs.
+Every bundle is verified for authenticity before any code runs. Argus checks the publisher's signature and cross-references a revocation list — if a bundle has been flagged, it won't install.
 
 ```bash
 # Manage specialists (content-addressed by BLAKE3 manifest hash)
@@ -110,8 +114,6 @@ Every event is:
 - **Chained** — each event's `parent_id` points to the previous event's id
 - **Independently verifiable** — `verifyChain()` only imports `@noble/*`, no Argus deps
 
-Key storage format (v2): `version(4) + PBKDF2_salt(32) + XChaCha20_nonce(24) + encrypted_privkey(48)` = 108 bytes.
-
 ---
 
 ## Roadmap
@@ -130,6 +132,8 @@ See [ARGUS_ROADMAP.md](./ARGUS_ROADMAP.md) for the full 12-week plan.
 ---
 
 ## Install
+
+**First time?** Start with `argus init` — it walks you through setting up your first agent in under 5 minutes.
 
 **Binary (recommended):**
 
@@ -155,19 +159,8 @@ bun link packages/cli  # makes `argus` available globally
 
 Run the test suite:
 ```bash
-bun test
+bun run --filter='*' test
 ```
-
----
-
-## v0.1 Ship Criteria
-
-- [x] All 165 tests pass on CI
-- [x] Binary builds for macOS arm64 and Linux x64 via `bun build --compile`
-- [x] Quickstart docs at `packages/docs/`
-- [x] GitHub release workflow triggers on `v*` tags
-- [x] SECURITY.md lists `support@argus.dev`
-- [x] No open `priority:p0` issues
 
 ## Architecture
 
