@@ -1,0 +1,10 @@
+{
+  "extends": "./tsconfig.base.json",
+  "references": [
+    { "path": "./packages/core" },
+    { "path": "./packages/cli" },
+    { "path": "./packages/specialists" },
+    { "path": "./packages/lineage" }
+  ],
+  "files": []
+}
