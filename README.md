@@ -52,6 +52,24 @@ contact = "#outbound-alerts"
 ### Phase 2 — Lineage Ledger ✅
 Ed25519-signed event chain with XChaCha20-Poly1305 key encryption, PBKDF2-SHA256 at 600k iterations, and a standalone chain verifier with zero Argus runtime dependencies.
 
+### Phase 3 — Fleet Layer ✅
+Content-addressed specialist runtime, cron/webhook initiative engine, budget enforcement, and human-in-the-loop escalation.
+
+```bash
+# Manage specialists (content-addressed by BLAKE3 manifest hash)
+argus fleet list
+argus fleet install ./packages/specialists/src/specialists/outbound/index.ts
+argus fleet remove <manifestHash>
+
+# Start the initiative engine
+argus daemon start --key ~/.argus/myagent.key
+```
+
+Reference specialists:
+- **outbound** — drafts cold outreach via Anthropic API (claude-haiku-4-5-20251001)
+- **weekly-report** — generates Markdown weekly report from configured data sources
+- **pr-review** — reviews GitHub PRs via gh CLI + Anthropic API, posts bot comment
+
 ```bash
 # Key management
 argus keys generate myagent
@@ -82,7 +100,7 @@ Key storage format (v2): `version(4) + PBKDF2_salt(32) + XChaCha20_nonce(24) + e
 | 0 | Repo scaffold, CI, threat model | ✅ Complete |
 | 1 | Contract DSL + SQLite store | ✅ Complete |
 | 2 | Lineage ledger + Ed25519 signing | ✅ Complete |
-| 3 | Fleet layer — specialist runtime, 3 reference specialists, initiative engine | 🔨 In progress |
+| 3 | Fleet layer — specialist runtime, 3 reference specialists, initiative engine | ✅ Complete |
 | 4 | Marketplace — publisher identity, content-addressed packages | 📋 Planned |
 | 5 | Cloud-optional relay, multi-tenant isolation | 📋 Planned |
 

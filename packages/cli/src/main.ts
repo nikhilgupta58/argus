@@ -5,6 +5,7 @@ import { contractCommand } from "./commands/contract.js";
 import { keysCommand } from "./commands/keys.js";
 import { lineageCommand } from "./commands/lineage.js";
 import { fleetCommand } from "./commands/fleet.js";
+import { daemonCommand } from "./commands/daemon.js";
 
 const program = new Command();
 
@@ -17,5 +18,6 @@ program.addCommand(contractCommand);
 program.addCommand(keysCommand);
 program.addCommand(lineageCommand);
 program.addCommand(fleetCommand);
+program.addCommand(daemonCommand);
 
 program.parse(process.argv);
