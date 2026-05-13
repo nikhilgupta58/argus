@@ -1,0 +1,39 @@
+id = "weekly-rev-report"
+version = "1.0.0"
+kind = "report"
+owner = "nikhilkumargupta58@gmail.com"
+outcome = "Produce a weekly revenue report pulling from Stripe, delivered every Monday by 9am"
+deadline = "2026-12-31T23:59:59Z"
+
+[[success_criteria]]
+name = "report_delivered"
+metric = "reports_delivered_on_time"
+target = 52
+operator = "gte"
+measurement = "automatic"
+
+[[success_criteria]]
+name = "data_freshness"
+metric = "data_lag_hours"
+target = 1
+operator = "lte"
+measurement = "automatic"
+
+[budget]
+tokens = 100000
+usd = 10.00
+hard_cap = false
+
+[[escalation]]
+trigger = "criterion_missed"
+channel = "slack"
+contact = "@nikhil"
+
+[[escalation]]
+trigger = "budget_80pct"
+channel = "email"
+contact = "nikhilkumargupta58@gmail.com"
+
+[metadata]
+cadence = "weekly"
+sources = "stripe,notion"

@@ -1,0 +1,38 @@
+id = "pr-review-sla"
+version = "1.0.0"
+kind = "pr-review"
+owner = "nikhilkumargupta58@gmail.com"
+outcome = "Review every open PR within 4 hours of opening, posting a structured review comment"
+deadline = "2026-12-31T23:59:59Z"
+
+[[success_criteria]]
+name = "review_latency"
+metric = "p95_review_latency_hours"
+target = 4
+operator = "lte"
+measurement = "automatic"
+
+[[success_criteria]]
+name = "coverage"
+metric = "prs_reviewed_pct"
+target = 100
+operator = "gte"
+measurement = "automatic"
+
+[budget]
+tokens = 2000000
+usd = 200.00
+hard_cap = false
+
+[[escalation]]
+trigger = "criterion_missed"
+channel = "github"
+contact = "@nikhilgupta58"
+
+[[escalation]]
+trigger = "budget_80pct"
+channel = "email"
+contact = "nikhilkumargupta58@gmail.com"
+
+[metadata]
+repo = "nikhilgupta58/argus"
