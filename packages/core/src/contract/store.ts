@@ -79,6 +79,17 @@ export class ContractStore {
       .all(id) as ContractRecord[];
   }
 
+  listAll(): Contract[] {
+    const rows = this.db
+      .prepare(
+        `SELECT body FROM contracts c1
+         WHERE created_at = (SELECT MAX(created_at) FROM contracts c2 WHERE c1.id = c2.id)
+         ORDER BY c1.id ASC`,
+      )
+      .all() as { body: string }[];
+    return rows.map((r) => JSON.parse(r.body) as Contract);
+  }
+
   close(): void {
     this.db.close();
   }
