@@ -189,7 +189,11 @@ argus --version
 ```bash
 git clone https://github.com/nikhilgupta58/argus.git
 cd argus && bun install
-cd packages/cli && bun link    # makes `argus` available globally (no build step needed)
+cd packages/cli && bun link    # registers the `argus` bin in ~/.bun/bin/
+
+# Make sure ~/.bun/bin is on your PATH (add to ~/.zshrc or ~/.bashrc if needed)
+export PATH="$HOME/.bun/bin:$PATH"
+
 argus --help
 ```
 
