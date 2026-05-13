@@ -14,7 +14,13 @@
     "build": "tsc -p tsconfig.json",
     "test": "vitest run"
   },
+  "dependencies": {
+    "@noble/curves": "^1.6.0",
+    "@noble/ciphers": "^1.0.0",
+    "@noble/hashes": "^1.4.0"
+  },
   "devDependencies": {
+    "fast-check": "^3.21.0",
     "vitest": "^2.0.0",
     "typescript": "^5.5.0"
   }
