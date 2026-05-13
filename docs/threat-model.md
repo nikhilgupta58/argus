@@ -102,6 +102,38 @@ The system has no mandatory cloud dependency. All signing keys and API keys live
 
 ---
 
+---
+
+## Adversary 4: Malicious Marketplace Publisher (v0.2)
+
+**Profile:** A threat actor who creates a publisher identity in the Argus marketplace and publishes a specialist bundle containing malicious code (a backdoor, credential harvester, or supply chain implant). Unlike Adversary 1 (anonymous skill author), this adversary has a registered publisher identity — making them traceable — but abuses the trust their identity conveys.
+
+### STRIDE Analysis
+
+| Threat | Scenario |
+|--------|----------|
+| **Spoofing** | Attacker registers a publisher display name (`argus-official`) that closely mimics a trusted publisher (`Argus Core Team`). Users see a signed bundle from a "trusted-looking" publisher and install without checking the publisher id. |
+| **Tampering** | After publishing a legitimate specialist that gains adoption, the attacker rotates their publisher key (by registering a new publisher id and re-publishing) and distributes a trojanized bundle with a valid signature from the new key. Users who verify signatures see a valid signature — but from a different publisher id. |
+| **Repudiation** | Attacker claims their publisher private key was stolen and denies having signed the malicious bundle. The `created_at` timestamp in the `publishers` table and the `bundledAt` field in the manifest are the only timestamps, and they are not externally anchored. |
+| **Information Disclosure** | Malicious specialist reads `process.env` during execution to exfiltrate `OPENAI_API_KEY`, `ANTHROPIC_API_KEY`, or other secrets and sends them to an attacker-controlled endpoint. The bundle passes signature verification because the attacker's own key signed it. |
+| **Denial of Service** | Specialist contains an infinite loop or issues unbounded LLM calls, consuming the user's budget before the contract hard cap kicks in. |
+| **Elevation of Privilege** | Specialist includes a Node native addon (`.node` binary), bypassing the Bun subprocess isolation to gain full host filesystem and network access. |
+
+### Mitigations (v0.1)
+
+- **Signed bundles verified on install.** `argus fleet install-bundle` calls `verifyBundle()`, which verifies the Ed25519 signature against the `publisherIdentity.publicKeyHex` embedded in the manifest. A bundle whose bytes have been modified since signing will fail BLAKE3 payload hash verification and be rejected before any code runs.
+- **Publisher identity is non-anonymous.** `argus publisher register` requires a display name and generates a keypair whose public key is stored in `marketplace.db`. There is no anonymous publishing path. The publisher id and public key are embedded in every signed manifest.
+- **Revocation list blocks known-bad bundles.** `argus marketplace revoke <bundleHash>` adds the bundle's BLAKE3 hash to the `revocations` table. `install-bundle` checks revocation before verifying the signature. A revoked bundle cannot be installed even if its signature is valid.
+- **Content-addressed bundles.** The `codeHash` field in the manifest is the BLAKE3 hash of `specialist.ts`. Any change to the code changes the hash, which changes the payload over which the signature is computed, which invalidates the signature.
+
+### Residual Risks (v0.2)
+
+- **No certificate transparency log for publisher registration.** Publisher identity is local only — there is no external anchor that records "publisher X registered at time T." A compromised local `marketplace.db` can be silently modified. Future work: anchor publisher registrations in a Sigstore certificate transparency log.
+- **No behavioral analysis of bundles.** A malicious bundle that passes signature verification is not further analyzed for malicious behavior before installation. Future work: static analysis pipeline (taint analysis, capability scanning) on published bundles.
+- **Revocation requires the correct `bundleHash`.** Revocation is keyed on the BLAKE3 hash of the exact `.tar.gz` file. If an attacker re-publishes a malicious bundle with minor changes, the new bundle has a different hash and is not covered by the existing revocation entry.
+
+---
+
 ## Residual Risks (v0.1)
 
 The following threats are acknowledged but not fully mitigated in the current version:
