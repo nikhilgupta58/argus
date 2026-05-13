@@ -31,8 +31,9 @@ No cloud required. Runs on your machine. Your data stays yours.
 ## Quick start
 
 ```bash
-# Install
-bun add -g argus
+# Install from source (see Install section below for binaries)
+git clone https://github.com/nikhilgupta58/argus.git && cd argus
+bun install && bun link packages/cli
 
 # Create your first outcome contract (interactive)
 argus init
@@ -168,16 +169,19 @@ See [ARGUS_ROADMAP.md](./ARGUS_ROADMAP.md) for the full 12-week plan.
 
 ## Install
 
-**Binary (recommended):**
+**Pre-built binary (recommended):**
 
-```bash
-bun add -g argus
-```
-
-Or download a pre-built binary from the [releases page](https://github.com/nikhilgupta58/argus/releases/latest):
+Download from the [releases page](https://github.com/nikhilgupta58/argus/releases/latest) and put it on your PATH:
 
 - `argus-macos-arm64` — macOS Apple Silicon
 - `argus-linux-x64` — Linux x86-64
+
+```bash
+# macOS example
+curl -L https://github.com/nikhilgupta58/argus/releases/latest/download/argus-macos-arm64 -o /usr/local/bin/argus
+chmod +x /usr/local/bin/argus
+argus --version
+```
 
 **From source** (requires [Bun](https://bun.sh) ≥ 1.1):
 
