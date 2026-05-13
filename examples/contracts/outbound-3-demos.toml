@@ -1,0 +1,39 @@
+id = "outbound-3-demos"
+version = "1.0.0"
+kind = "outbound"
+owner = "nikhilkumargupta58@gmail.com"
+outcome = "Land 3 qualified demo calls from cold outbound within 30 days"
+deadline = "2026-06-12T23:59:59Z"
+
+[[success_criteria]]
+name = "demo_calls_landed"
+metric = "qualified_demo_calls"
+target = 3
+operator = "gte"
+measurement = "manual"
+
+[[success_criteria]]
+name = "reply_rate"
+metric = "reply_rate_pct"
+target = 5
+operator = "gte"
+measurement = "automatic"
+
+[budget]
+tokens = 500000
+usd = 50.00
+hard_cap = true
+
+[[escalation]]
+trigger = "budget_80pct"
+channel = "slack"
+contact = "@nikhil"
+
+[[escalation]]
+trigger = "deadline_48h"
+channel = "email"
+contact = "nikhilkumargupta58@gmail.com"
+
+[metadata]
+campaign = "year1-launch"
+target_segment = "b2b-saas-founders"
