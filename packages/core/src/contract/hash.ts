@@ -2,7 +2,7 @@ import { blake3 } from "@noble/hashes/blake3";
 import { bytesToHex } from "@noble/hashes/utils";
 import type { Contract } from "./types.js";
 
-function sortObjectKeys(obj: unknown): unknown {
+export function sortObjectKeys(obj: unknown): unknown {
   if (Array.isArray(obj)) return obj.map(sortObjectKeys);
   if (obj !== null && typeof obj === "object") {
     const sorted: Record<string, unknown> = {};

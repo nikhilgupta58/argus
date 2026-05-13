@@ -1,3 +1,4 @@
+import { sortObjectKeys } from "./hash.js";
 import type { Contract } from "./types.js";
 
 export type DiffCategory =
@@ -9,7 +10,12 @@ export type DiffCategory =
   | "criteria_modified"
   | "escalation_changed"
   | "kind_changed"
+  | "metadata_changed"
   | "metadata_only";
+
+function stableJson(val: unknown): string {
+  return JSON.stringify(sortObjectKeys(val));
+}
 
 export function diffContracts(a: Contract, b: Contract): DiffCategory[] {
   const changes: DiffCategory[] = [];
@@ -18,7 +24,7 @@ export function diffContracts(a: Contract, b: Contract): DiffCategory[] {
   if (a.outcome !== b.outcome) changes.push("outcome_changed");
   if (a.deadline !== b.deadline) changes.push("deadline_shifted");
 
-  if (JSON.stringify(a.budget) !== JSON.stringify(b.budget)) {
+  if (stableJson(a.budget) !== stableJson(b.budget)) {
     changes.push("budget_changed");
   }
 
@@ -34,19 +40,18 @@ export function diffContracts(a: Contract, b: Contract): DiffCategory[] {
   const aMap = new Map(a.success_criteria.map((s) => [s.name, s]));
   const bMap = new Map(b.success_criteria.map((s) => [s.name, s]));
   const criteriaModified = sharedNames.some(
-    (n) => JSON.stringify(aMap.get(n)) !== JSON.stringify(bMap.get(n)),
+    (n) => stableJson(aMap.get(n)) !== stableJson(bMap.get(n)),
   );
   if (criteriaModified) changes.push("criteria_modified");
 
-  if (JSON.stringify(a.escalation) !== JSON.stringify(b.escalation)) {
+  if (stableJson(a.escalation) !== stableJson(b.escalation)) {
     changes.push("escalation_changed");
   }
 
   const coreChanged = changes.length > 0;
-  const metaA = JSON.stringify(a.metadata ?? {});
-  const metaB = JSON.stringify(b.metadata ?? {});
-  if (!coreChanged && metaA !== metaB) {
-    changes.push("metadata_only");
+  const metaChanged = stableJson(a.metadata ?? {}) !== stableJson(b.metadata ?? {});
+  if (metaChanged) {
+    changes.push(coreChanged ? "metadata_changed" : "metadata_only");
   }
 
   return changes;

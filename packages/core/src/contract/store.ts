@@ -1,5 +1,6 @@
 import { Database } from "bun:sqlite";
 import { rmSync } from "node:fs";
+import { resolve } from "node:path";
 import { contractHash } from "./hash.js";
 import type { Contract } from "./types.js";
 
@@ -29,15 +30,15 @@ export class ContractStore {
   private db: Database;
 
   constructor(path: string = ":memory:") {
-    // Clean up stale WAL/SHM files that can prevent schema creation when the
-    // main DB file was removed but the journal files were left behind.
-    if (path !== ":memory:") {
-      try { rmSync(`${path}-wal`); } catch {}
-      try { rmSync(`${path}-shm`); } catch {}
+    const resolvedPath = path === ":memory:" ? path : resolve(path);
+    this.db = new Database(resolvedPath, { create: true });
+    this.db.run("PRAGMA journal_mode=WAL;");
+    // clean up stale WAL/SHM files from previous abnormal exits
+    if (resolvedPath !== ":memory:") {
+      try { rmSync(`${resolvedPath}-wal`); } catch {}
+      try { rmSync(`${resolvedPath}-shm`); } catch {}
     }
-    this.db = new Database(path, { create: true });
-    this.db.exec("PRAGMA journal_mode=WAL;");
-    this.db.exec(SCHEMA);
+    this.db.run(SCHEMA);
   }
 
   save(contract: Contract, parentVersion?: string): void {

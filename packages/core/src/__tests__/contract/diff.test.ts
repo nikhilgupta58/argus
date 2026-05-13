@@ -77,4 +77,35 @@ describe("diffContracts", () => {
     expect(diff).toContain("metadata_only");
     expect(diff).toHaveLength(1);
   });
+
+  it("detects criteria_added", () => {
+    const a = makeContract();
+    const b = makeContract({
+      success_criteria: [
+        { name: "done", metric: "tasks_completed", target: 1, operator: "gte", measurement: "automatic" },
+        { name: "new_criterion", metric: "other_metric", target: 10, operator: "gte", measurement: "automatic" },
+      ],
+    });
+    expect(diffContracts(a, b)).toContain("criteria_added");
+  });
+
+  it("detects criteria_removed", () => {
+    const a = makeContract({
+      success_criteria: [
+        { name: "done", metric: "tasks_completed", target: 1, operator: "gte", measurement: "automatic" },
+        { name: "extra", metric: "extra_metric", target: 5, operator: "gte", measurement: "automatic" },
+      ],
+    });
+    const b = makeContract();
+    expect(diffContracts(a, b)).toContain("criteria_removed");
+  });
+
+  it("detects metadata_changed (not metadata_only) when core fields also change", () => {
+    const a = makeContract();
+    const b = makeContract({ outcome: "Changed outcome", metadata: { tag: "v2" } });
+    const diff = diffContracts(a, b);
+    expect(diff).toContain("outcome_changed");
+    expect(diff).toContain("metadata_changed");
+    expect(diff).not.toContain("metadata_only");
+  });
 });

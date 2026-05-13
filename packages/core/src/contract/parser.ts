@@ -31,5 +31,5 @@ export function parseContract(toml: string): Result<Contract, ContractError> {
     };
   }
 
-  return { ok: true, value: result.data as Contract };
+  return { ok: true, value: result.data };
 }
