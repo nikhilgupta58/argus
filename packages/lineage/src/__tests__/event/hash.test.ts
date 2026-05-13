@@ -1,5 +1,5 @@
-import { describe, it, expect } from "vitest";
-import { eventId, canonicalEventJson } from "../../event/hash.js";
+import { describe, expect, it } from "vitest";
+import { canonicalEventJson, eventId } from "../../event/hash.js";
 import type { Event } from "../../event/types.js";
 
 const BASE: Omit<Event, "id"> = {
@@ -40,8 +40,8 @@ describe("canonicalEventJson", () => {
     const parsed = JSON.parse(json) as Record<string, unknown>;
     const keys = Object.keys(parsed);
     expect(keys).toEqual([...keys].sort());
-    expect(parsed["id"]).toBe("abc123");
-    expect(parsed["contract_id"]).toBe("outbound-3-demos");
+    expect(parsed.id).toBe("abc123");
+    expect(parsed.contract_id).toBe("outbound-3-demos");
   });
 
   it("is deterministic across calls", () => {

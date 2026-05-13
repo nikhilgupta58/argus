@@ -1,7 +1,7 @@
-import { describe, it, expect } from "vitest";
-import { signEvent, verifyEvent } from "../../signing/sign.js";
-import { eventId } from "../../event/hash.js";
 import { ed25519 } from "@noble/curves/ed25519";
+import { describe, expect, it } from "vitest";
+import { eventId } from "../../event/hash.js";
+import { signEvent, verifyEvent } from "../../signing/sign.js";
 
 function makePrivKey(): Uint8Array {
   return ed25519.utils.randomPrivateKey();
@@ -67,7 +67,12 @@ describe("verifyEvent", () => {
     const key2 = makePrivKey();
     const event = makeBaseEvent();
     const signed = signEvent(event, key1);
-    const wrongKey = { ...signed, public_key: Array.from(ed25519.getPublicKey(key2)).map(b => b.toString(16).padStart(2, "0")).join("") };
+    const wrongKey = {
+      ...signed,
+      public_key: Array.from(ed25519.getPublicKey(key2))
+        .map((b) => b.toString(16).padStart(2, "0"))
+        .join(""),
+    };
     expect(verifyEvent(wrongKey)).toBe(false);
   });
 });

@@ -29,14 +29,18 @@ export interface ContractRecord {
 export class ContractStore {
   private db: Database;
 
-  constructor(path: string = ":memory:") {
+  constructor(path = ":memory:") {
     const resolvedPath = path === ":memory:" ? path : resolve(path);
     this.db = new Database(resolvedPath, { create: true });
     this.db.run("PRAGMA journal_mode=WAL;");
     // clean up stale WAL/SHM files from previous abnormal exits
     if (resolvedPath !== ":memory:") {
-      try { rmSync(`${resolvedPath}-wal`); } catch {}
-      try { rmSync(`${resolvedPath}-shm`); } catch {}
+      try {
+        rmSync(`${resolvedPath}-wal`);
+      } catch {}
+      try {
+        rmSync(`${resolvedPath}-shm`);
+      } catch {}
     }
     this.db.run(SCHEMA);
   }
@@ -66,7 +70,9 @@ export class ContractStore {
 
   loadLatest(id: string): Contract | null {
     const row = this.db
-      .prepare("SELECT body FROM contracts WHERE id = ? ORDER BY created_at DESC, rowid DESC LIMIT 1")
+      .prepare(
+        "SELECT body FROM contracts WHERE id = ? ORDER BY created_at DESC, rowid DESC LIMIT 1",
+      )
       .get(id) as { body: string } | null;
     return row ? (JSON.parse(row.body) as Contract) : null;
   }

@@ -1,18 +1,24 @@
-import { describe, it, expect, afterEach } from "vitest";
 import { readFileSync } from "node:fs";
-import { join, dirname } from "node:path";
-import { fileURLToPath } from "node:url";
 import { rmSync } from "node:fs";
-import { parseContract, contractHash, diffContracts, ContractStore } from "../../contract/index.js";
+import { dirname, join } from "node:path";
+import { fileURLToPath } from "node:url";
+import { afterEach, describe, expect, it } from "vitest";
+import { ContractStore, contractHash, diffContracts, parseContract } from "../../contract/index.js";
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const DB_PATH = "/tmp/argus-integration-test.db";
 const EXAMPLES = join(__dirname, "../../../../../examples/contracts");
 
 afterEach(() => {
-  try { rmSync(DB_PATH); } catch {}
-  try { rmSync(DB_PATH + "-wal"); } catch {}
-  try { rmSync(DB_PATH + "-shm"); } catch {}
+  try {
+    rmSync(DB_PATH);
+  } catch {}
+  try {
+    rmSync(`${DB_PATH}-wal`);
+  } catch {}
+  try {
+    rmSync(`${DB_PATH}-shm`);
+  } catch {}
 });
 
 describe("Contract Layer — end-to-end", () => {
@@ -67,7 +73,8 @@ describe("Contract Layer — end-to-end", () => {
       store.save(r.value);
       const loaded = store.loadLatest(r.value.id);
       expect(loaded?.id).toBe(r.value.id);
-      expect(contractHash(loaded!)).toBe(contractHash(r.value));
+      if (!loaded) throw new Error("loaded contract is null");
+      expect(contractHash(loaded)).toBe(contractHash(r.value));
     }
 
     store.close();

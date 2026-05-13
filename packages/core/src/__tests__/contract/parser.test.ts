@@ -1,4 +1,4 @@
-import { describe, it, expect } from "vitest";
+import { describe, expect, it } from "vitest";
 import { parseContract } from "../../contract/parser.js";
 
 const VALID_TOML = `
@@ -34,7 +34,7 @@ describe("parseContract", () => {
     expect(result.value.id).toBe("outbound-q2-2026");
     expect(result.value.kind).toBe("outbound");
     expect(result.value.success_criteria).toHaveLength(1);
-    expect(result.value.success_criteria[0]!.measurement).toBe("automatic");
+    expect(result.value.success_criteria[0]?.measurement).toBe("automatic");
   });
 
   it("returns PARSE_ERROR on invalid TOML syntax", () => {
@@ -65,7 +65,7 @@ describe("parseContract", () => {
   });
 
   it("returns SCHEMA_ERROR when success_criteria names are duplicated", () => {
-    const dup = VALID_TOML + `
+    const dup = `${VALID_TOML}
 [[success_criteria]]
 name = "demo_calls"
 metric = "other_metric"

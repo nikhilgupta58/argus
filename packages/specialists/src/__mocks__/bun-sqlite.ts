@@ -1,5 +1,8 @@
 export class SQLiteError extends Error {
-  constructor(message: string, public readonly code?: string) {
+  constructor(
+    message: string,
+    public readonly code?: string,
+  ) {
     super(message);
     this.name = "SQLiteError";
   }
@@ -25,8 +28,8 @@ function parseSql(sql: string): { type: string; table: string } {
     return { type: "SELECT", table: m?.[1] ?? "" };
   }
   if (s.startsWith("CREATE TABLE")) {
-    const m = sql.match(/CREATE TABLE IF NOT EXISTS\s+(\w+)/i) ??
-              sql.match(/CREATE TABLE\s+(\w+)/i);
+    const m =
+      sql.match(/CREATE TABLE IF NOT EXISTS\s+(\w+)/i) ?? sql.match(/CREATE TABLE\s+(\w+)/i);
     return { type: "CREATE_TABLE", table: m?.[1] ?? "" };
   }
   if (s.startsWith("CREATE INDEX")) {
@@ -38,7 +41,11 @@ function parseSql(sql: string): { type: string; table: string } {
   return { type: "UNKNOWN", table: "" };
 }
 
-function extractColumns(createSql: string): { columns: string[]; primaryKey: string | null; uniqueConstraints: string[][] } {
+function extractColumns(createSql: string): {
+  columns: string[];
+  primaryKey: string | null;
+  uniqueConstraints: string[][];
+} {
   // Extract column names from CREATE TABLE statement
   const bodyMatch = createSql.match(/\((.+)\)/s);
   if (!bodyMatch) return { columns: [], primaryKey: null, uniqueConstraints: [] };
@@ -80,8 +87,6 @@ function extractColumns(createSql: string): { columns: string[]; primaryKey: str
 export class Database {
   private tables: Map<string, TableData> = new Map();
 
-  constructor(_path?: string, _opts?: unknown) {}
-
   run(sql: string, ..._args: unknown[]): void {
     const { type, table } = parseSql(sql);
     if (type === "CREATE_TABLE" && table) {
@@ -116,10 +121,12 @@ export class Database {
           // Check PRIMARY KEY uniqueness
           if (tableData.primaryKey) {
             const pkVal = row[tableData.primaryKey];
-            if (tableData.rows.some((r) => r[tableData.primaryKey!] === pkVal)) {
+            if (
+              tableData.rows.some((r) => tableData.primaryKey && r[tableData.primaryKey] === pkVal)
+            ) {
               throw new SQLiteError(
                 `UNIQUE constraint failed: ${table}.${tableData.primaryKey}`,
-                "SQLITE_CONSTRAINT_PRIMARYKEY"
+                "SQLITE_CONSTRAINT_PRIMARYKEY",
               );
             }
           }
@@ -127,12 +134,12 @@ export class Database {
           // Check UNIQUE constraints
           for (const constraint of tableData.uniqueConstraints) {
             const existing = tableData.rows.find((r) =>
-              constraint.every((col) => r[col] === row[col])
+              constraint.every((col) => r[col] === row[col]),
             );
             if (existing) {
               throw new SQLiteError(
                 `UNIQUE constraint failed: ${constraint.map((c) => `${table}.${c}`).join(", ")}`,
-                "SQLITE_CONSTRAINT_UNIQUE"
+                "SQLITE_CONSTRAINT_UNIQUE",
               );
             }
           }
@@ -220,7 +227,7 @@ export class Database {
     // Parse LIMIT clause
     const limitMatch = sql.match(/LIMIT\s+(\d+)/i);
     if (limitMatch) {
-      results = results.slice(0, parseInt(limitMatch[1], 10));
+      results = results.slice(0, Number.parseInt(limitMatch[1], 10));
     }
 
     // Project only selected columns (SELECT col1, col2, ... FROM)

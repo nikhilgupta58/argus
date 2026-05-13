@@ -1,5 +1,5 @@
-import { defineConfig } from "astro/config";
 import starlight from "@astrojs/starlight";
+import { defineConfig } from "astro/config";
 
 export default defineConfig({
   integrations: [
@@ -12,9 +12,7 @@ export default defineConfig({
       sidebar: [
         {
           label: "Get Started",
-          items: [
-            { label: "Quickstart", slug: "" },
-          ],
+          items: [{ label: "Quickstart", slug: "" }],
         },
         {
           label: "Reference",

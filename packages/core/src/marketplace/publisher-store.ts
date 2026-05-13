@@ -34,7 +34,7 @@ CREATE TABLE IF NOT EXISTS revocations (
 export class PublisherStore {
   private db: Database;
 
-  constructor(path: string = ":memory:") {
+  constructor(path = ":memory:") {
     const resolvedPath = path === ":memory:" ? path : resolve(path);
     this.db = new Database(resolvedPath, { create: true });
     this.db.run("PRAGMA journal_mode=WAL;");
@@ -43,10 +43,12 @@ export class PublisherStore {
   }
 
   register(publisher: Publisher): void {
-    this.db.prepare(`
+    this.db
+      .prepare(`
       INSERT INTO publishers (id, name, public_key_hex, created_at)
       VALUES (?, ?, ?, ?)
-    `).run(publisher.id, publisher.name, publisher.public_key_hex, publisher.created_at);
+    `)
+      .run(publisher.id, publisher.name, publisher.public_key_hex, publisher.created_at);
   }
 
   getById(id: string): Publisher | null {
@@ -58,15 +60,19 @@ export class PublisherStore {
 
   list(): Publisher[] {
     return this.db
-      .prepare("SELECT id, name, public_key_hex, created_at FROM publishers ORDER BY created_at ASC")
+      .prepare(
+        "SELECT id, name, public_key_hex, created_at FROM publishers ORDER BY created_at ASC",
+      )
       .all() as Publisher[];
   }
 
   revoke(bundleHash: string, reason?: string): void {
-    this.db.prepare(`
+    this.db
+      .prepare(`
       INSERT INTO revocations (bundle_hash, revoked_at, reason)
       VALUES (?, ?, ?)
-    `).run(bundleHash, new Date().toISOString(), reason ?? null);
+    `)
+      .run(bundleHash, new Date().toISOString(), reason ?? null);
   }
 
   isRevoked(bundleHash: string): boolean {

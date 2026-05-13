@@ -11,7 +11,13 @@ async function main(): Promise<void> {
   const mod = await import(entrypoint);
   if (!mod.default || typeof mod.default.execute !== "function") {
     process.stdout.write(
-      JSON.stringify({ ok: false, error: { code: "SANDBOX_ERROR", message: "Specialist has no default export with execute()" } })
+      JSON.stringify({
+        ok: false,
+        error: {
+          code: "SANDBOX_ERROR",
+          message: "Specialist has no default export with execute()",
+        },
+      }),
     );
     process.exit(1);
   }
@@ -22,7 +28,7 @@ async function main(): Promise<void> {
 
 main().catch((err: unknown) => {
   process.stdout.write(
-    JSON.stringify({ ok: false, error: { code: "SANDBOX_ERROR", message: String(err) } })
+    JSON.stringify({ ok: false, error: { code: "SANDBOX_ERROR", message: String(err) } }),
   );
   process.exit(1);
 });

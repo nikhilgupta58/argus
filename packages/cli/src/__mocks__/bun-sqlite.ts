@@ -1,12 +1,14 @@
 export class SQLiteError extends Error {
-  constructor(message: string, public readonly code?: string) {
+  constructor(
+    message: string,
+    public readonly code?: string,
+  ) {
     super(message);
     this.name = "SQLiteError";
   }
 }
 
 export class Database {
-  constructor(_path?: string, _opts?: unknown) {}
   run(_sql: string, ..._args: unknown[]): void {}
   prepare(_sql: string) {
     return {

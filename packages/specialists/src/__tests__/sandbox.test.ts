@@ -1,4 +1,4 @@
-import { describe, it, expect, vi, beforeEach } from "vitest";
+import { beforeEach, describe, expect, it, vi } from "vitest";
 import { BunSandbox } from "../sandbox.js";
 import type { SpecialistContext, SpecialistOutput } from "../types.js";
 
@@ -30,7 +30,11 @@ describe("BunSandbox", () => {
             controller.close();
           },
         }),
-        stderr: new ReadableStream({ start(c) { c.close(); } }),
+        stderr: new ReadableStream({
+          start(c) {
+            c.close();
+          },
+        }),
       }),
     });
 
@@ -45,7 +49,11 @@ describe("BunSandbox", () => {
       spawn: vi.fn().mockReturnValue({
         exited: Promise.resolve(1),
         stdin: { write: vi.fn(), end: vi.fn() },
-        stdout: new ReadableStream({ start(c) { c.close(); } }),
+        stdout: new ReadableStream({
+          start(c) {
+            c.close();
+          },
+        }),
         stderr: new ReadableStream({
           start(controller) {
             controller.enqueue(encoder.encode("ReferenceError: x is not defined"));
@@ -66,7 +74,9 @@ describe("BunSandbox", () => {
 
   it("returns SANDBOX_ERROR on spawn exception", async () => {
     vi.stubGlobal("Bun", {
-      spawn: vi.fn().mockImplementation(() => { throw new Error("spawn failed"); }),
+      spawn: vi.fn().mockImplementation(() => {
+        throw new Error("spawn failed");
+      }),
     });
 
     const sandbox = new BunSandbox();

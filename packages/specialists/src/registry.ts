@@ -1,5 +1,5 @@
+import { existsSync, readFileSync, writeFileSync } from "node:fs";
 import { resolve } from "node:path";
-import { readFileSync, writeFileSync, existsSync } from "node:fs";
 import { blake3 } from "@noble/hashes/blake3";
 import { bytesToHex } from "@noble/hashes/utils";
 import type { SpecialistManifest } from "./types.js";
@@ -12,15 +12,13 @@ function sortKeys(obj: unknown): unknown {
     return Object.fromEntries(
       Object.keys(obj as object)
         .sort()
-        .map((k) => [k, sortKeys((obj as Record<string, unknown>)[k])])
+        .map((k) => [k, sortKeys((obj as Record<string, unknown>)[k])]),
     );
   }
   return obj;
 }
 
-export function computeManifestHash(
-  manifest: Omit<SpecialistManifest, "manifestHash">
-): string {
+export function computeManifestHash(manifest: Omit<SpecialistManifest, "manifestHash">): string {
   return bytesToHex(blake3(encoder.encode(JSON.stringify(sortKeys(manifest)))));
 }
 
@@ -60,9 +58,7 @@ export class SpecialistRegistry {
       codeHash: manifest.codeHash,
     });
     if (expected !== manifest.manifestHash) {
-      throw new Error(
-        `manifestHash mismatch: expected ${expected}, got ${manifest.manifestHash}`
-      );
+      throw new Error(`manifestHash mismatch: expected ${expected}, got ${manifest.manifestHash}`);
     }
     this.entries.set(manifest.manifestHash, manifest);
     this.save();
@@ -82,8 +78,6 @@ export class SpecialistRegistry {
   }
 
   findByKind(contractKind: string): SpecialistManifest[] {
-    return [...this.entries.values()].filter((m) =>
-      m.contractKinds.includes(contractKind)
-    );
+    return [...this.entries.values()].filter((m) => m.contractKinds.includes(contractKind));
   }
 }

@@ -1,11 +1,11 @@
-import { Command } from "commander";
 import { resolve } from "node:path";
+import { Command } from "commander";
 import pc from "picocolors";
 import { DaemonRunner } from "../daemon/runner.js";
 
-const DEFAULT_DB = resolve(process.env["HOME"] ?? "~", ".argus", "argus.db");
-const DEFAULT_LINEAGE_DB = resolve(process.env["HOME"] ?? "~", ".argus", "lineage.db");
-const DEFAULT_REGISTRY = resolve(process.env["HOME"] ?? "~", ".argus", "registry.json");
+const DEFAULT_DB = resolve(process.env.HOME ?? "~", ".argus", "argus.db");
+const DEFAULT_LINEAGE_DB = resolve(process.env.HOME ?? "~", ".argus", "lineage.db");
+const DEFAULT_REGISTRY = resolve(process.env.HOME ?? "~", ".argus", "registry.json");
 
 const runner = new DaemonRunner();
 
@@ -31,7 +31,7 @@ const startCmd = new Command("start")
         console.error(pc.red("--key is required"));
         process.exit(1);
       }
-      const passphrase = process.env["ARGUS_PASSPHRASE"] ?? opts.passphrase ?? "";
+      const passphrase = process.env.ARGUS_PASSPHRASE ?? opts.passphrase ?? "";
       if (!passphrase) {
         console.error(pc.red("--passphrase or ARGUS_PASSPHRASE env var is required"));
         process.exit(1);

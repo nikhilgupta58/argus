@@ -1,15 +1,15 @@
 #!/usr/bin/env bun
-import { Command } from "commander";
 import { ARGUS_VERSION } from "@argus/core";
-import { initCommand } from "./commands/init.js";
+import { Command } from "commander";
 import { contractCommand } from "./commands/contract.js";
+import { daemonCommand } from "./commands/daemon.js";
+import { fleetCommand } from "./commands/fleet.js";
+import { initCommand } from "./commands/init.js";
 import { keysCommand } from "./commands/keys.js";
 import { lineageCommand } from "./commands/lineage.js";
-import { fleetCommand } from "./commands/fleet.js";
-import { daemonCommand } from "./commands/daemon.js";
+import { marketplaceCommand } from "./commands/marketplace.js";
 import { publisherCommand } from "./commands/publisher.js";
 import { specialistPublishCommand } from "./commands/specialist-publish.js";
-import { marketplaceCommand } from "./commands/marketplace.js";
 
 const program = new Command();
 

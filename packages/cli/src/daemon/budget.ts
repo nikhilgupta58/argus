@@ -25,8 +25,8 @@ export class BudgetTracker {
 
   check(contractId: string, budget: ContractBudget): BudgetCheckResult {
     const used = this.spent.get(contractId) ?? { tokensUsed: 0, usdUsed: 0 };
-    const tokensLimit = budget.tokens ?? Infinity;
-    const usdLimit = budget.usd ?? Infinity;
+    const tokensLimit = budget.tokens ?? Number.POSITIVE_INFINITY;
+    const usdLimit = budget.usd ?? Number.POSITIVE_INFINITY;
     const tokensRemaining = Math.max(0, tokensLimit - used.tokensUsed);
     const usdRemaining = Math.max(0, usdLimit - used.usdUsed);
     const over = used.tokensUsed > tokensLimit || used.usdUsed > usdLimit;

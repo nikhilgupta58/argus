@@ -1,8 +1,8 @@
 import { blake3 } from "@noble/hashes/blake3";
 import { bytesToHex } from "@noble/hashes/utils";
 import { eventId } from "../event/hash.js";
-import { signEvent } from "../signing/sign.js";
 import type { SignedEvent } from "../event/types.js";
+import { signEvent } from "../signing/sign.js";
 
 export function createRevertEvent(
   targetEvent: SignedEvent,

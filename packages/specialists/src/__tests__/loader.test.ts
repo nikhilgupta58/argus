@@ -1,7 +1,7 @@
-import { describe, it, expect } from "vitest";
+import { rmSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
-import { writeFileSync, rmSync } from "node:fs";
+import { describe, expect, it } from "vitest";
 import { loadSpecialist } from "../loader.js";
 import { computeCodeHash } from "../registry.js";
 import type { SpecialistManifest } from "../types.js";

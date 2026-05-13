@@ -1,8 +1,8 @@
-import { describe, it, expect, beforeEach, afterEach } from "vitest";
-import { EventStore } from "../../event/store.js";
-import { eventId } from "../../event/hash.js";
-import type { SignedEvent } from "../../event/types.js";
 import { rmSync } from "node:fs";
+import { afterEach, beforeEach, describe, expect, it } from "vitest";
+import { eventId } from "../../event/hash.js";
+import { EventStore } from "../../event/store.js";
+import type { SignedEvent } from "../../event/types.js";
 
 const DB = "/tmp/argus-lineage-test.db";
 
@@ -28,11 +28,15 @@ function makeEvent(overrides: Partial<SignedEvent> = {}): SignedEvent {
 describe("EventStore", () => {
   let store: EventStore;
 
-  beforeEach(() => { store = new EventStore(DB); });
+  beforeEach(() => {
+    store = new EventStore(DB);
+  });
   afterEach(() => {
     store.close();
     for (const s of [DB, `${DB}-wal`, `${DB}-shm`]) {
-      try { rmSync(s); } catch {}
+      try {
+        rmSync(s);
+      } catch {}
     }
   });
 
@@ -74,8 +78,8 @@ describe("EventStore", () => {
     store.append(ev1);
     const chain = store.getChain("test-contract");
     expect(chain).toHaveLength(2);
-    expect(chain[0]!.sequence).toBe(0);
-    expect(chain[1]!.sequence).toBe(1);
+    expect(chain[0]?.sequence).toBe(0);
+    expect(chain[1]?.sequence).toBe(1);
   });
 
   it("getLatest returns the highest-sequence event for a contract", () => {

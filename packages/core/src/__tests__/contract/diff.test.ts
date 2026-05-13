@@ -1,4 +1,4 @@
-import { describe, it, expect } from "vitest";
+import { describe, expect, it } from "vitest";
 import { diffContracts } from "../../contract/diff.js";
 import { parseContract } from "../../contract/parser.js";
 import type { Contract } from "../../contract/types.js";
@@ -28,7 +28,7 @@ channel = "email"
 contact = "test@example.com"
 `;
   const result = parseContract(base);
-  if (!result.ok) throw new Error("invalid base: " + result.error.message);
+  if (!result.ok) throw new Error(`invalid base: ${result.error.message}`);
   return { ...result.value, ...overrides } as Contract;
 }
 
@@ -59,7 +59,15 @@ describe("diffContracts", () => {
   it("detects criteria_modified", () => {
     const a = makeContract();
     const b = makeContract({
-      success_criteria: [{ name: "done", metric: "tasks_completed", target: 5, operator: "gte", measurement: "automatic" }],
+      success_criteria: [
+        {
+          name: "done",
+          metric: "tasks_completed",
+          target: 5,
+          operator: "gte",
+          measurement: "automatic",
+        },
+      ],
     });
     expect(diffContracts(a, b)).toContain("criteria_modified");
   });
@@ -82,8 +90,20 @@ describe("diffContracts", () => {
     const a = makeContract();
     const b = makeContract({
       success_criteria: [
-        { name: "done", metric: "tasks_completed", target: 1, operator: "gte", measurement: "automatic" },
-        { name: "new_criterion", metric: "other_metric", target: 10, operator: "gte", measurement: "automatic" },
+        {
+          name: "done",
+          metric: "tasks_completed",
+          target: 1,
+          operator: "gte",
+          measurement: "automatic",
+        },
+        {
+          name: "new_criterion",
+          metric: "other_metric",
+          target: 10,
+          operator: "gte",
+          measurement: "automatic",
+        },
       ],
     });
     expect(diffContracts(a, b)).toContain("criteria_added");
@@ -92,8 +112,20 @@ describe("diffContracts", () => {
   it("detects criteria_removed", () => {
     const a = makeContract({
       success_criteria: [
-        { name: "done", metric: "tasks_completed", target: 1, operator: "gte", measurement: "automatic" },
-        { name: "extra", metric: "extra_metric", target: 5, operator: "gte", measurement: "automatic" },
+        {
+          name: "done",
+          metric: "tasks_completed",
+          target: 1,
+          operator: "gte",
+          measurement: "automatic",
+        },
+        {
+          name: "extra",
+          metric: "extra_metric",
+          target: 5,
+          operator: "gte",
+          measurement: "automatic",
+        },
       ],
     });
     const b = makeContract();

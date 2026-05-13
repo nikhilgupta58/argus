@@ -1,13 +1,14 @@
-import { Command } from "commander";
 import { existsSync, mkdirSync } from "node:fs";
 import { resolve } from "node:path";
-import pc from "picocolors";
 import { PublisherStore } from "@argus/core";
+import type { RevokedBundle } from "@argus/core";
+import { Command } from "commander";
+import pc from "picocolors";
 
-const DEFAULT_MARKETPLACE_DB = resolve(process.env["HOME"] ?? "~", ".argus", "marketplace.db");
+const DEFAULT_MARKETPLACE_DB = resolve(process.env.HOME ?? "~", ".argus", "marketplace.db");
 
 function getStore(): PublisherStore {
-  const dbPath = process.env["ARGUS_MARKETPLACE_DB"] ?? DEFAULT_MARKETPLACE_DB;
+  const dbPath = process.env.ARGUS_MARKETPLACE_DB ?? DEFAULT_MARKETPLACE_DB;
   const dir = resolve(dbPath, "..");
   if (!existsSync(dir)) mkdirSync(dir, { recursive: true });
   return new PublisherStore(dbPath);
@@ -36,7 +37,7 @@ const listRevokedCmd = new Command("list-revoked")
   .description("List all revoked bundle hashes")
   .action(() => {
     const store = getStore();
-    let revoked;
+    let revoked: RevokedBundle[];
     try {
       revoked = store.getRevokedBundles();
     } finally {
@@ -47,7 +48,9 @@ const listRevokedCmd = new Command("list-revoked")
       return;
     }
     for (const r of revoked) {
-      console.log(`${pc.red(r.bundle_hash.slice(0, 16))}...  ${pc.dim(r.revoked_at)}  ${r.reason ?? ""}`);
+      console.log(
+        `${pc.red(r.bundle_hash.slice(0, 16))}...  ${pc.dim(r.revoked_at)}  ${r.reason ?? ""}`,
+      );
     }
   });
 

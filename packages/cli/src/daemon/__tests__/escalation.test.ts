@@ -1,6 +1,6 @@
-import { describe, it, expect, vi, beforeEach } from "vitest";
-import { EscalationDispatcher } from "../escalation.js";
 import type { EscalationRule } from "@argus/core";
+import { beforeEach, describe, expect, it, vi } from "vitest";
+import { EscalationDispatcher } from "../escalation.js";
 
 describe("EscalationDispatcher", () => {
   beforeEach(() => {
@@ -18,7 +18,11 @@ describe("EscalationDispatcher", () => {
     };
 
     const dispatcher = new EscalationDispatcher();
-    await dispatcher.dispatch(rule, { contractId: "c1", trigger: "budget > 80%", message: "Budget at 85%" });
+    await dispatcher.dispatch(rule, {
+      contractId: "c1",
+      trigger: "budget > 80%",
+      message: "Budget at 85%",
+    });
 
     expect(fetchMock).toHaveBeenCalledOnce();
     const [url, opts] = fetchMock.mock.calls[0];
@@ -32,9 +36,16 @@ describe("EscalationDispatcher", () => {
       spawn: vi.fn().mockReturnValue({
         exited: Promise.resolve(0),
         stdout: new ReadableStream({
-          start(c) { c.enqueue(encoder.encode("https://github.com/org/repo/issues/99")); c.close(); }
+          start(c) {
+            c.enqueue(encoder.encode("https://github.com/org/repo/issues/99"));
+            c.close();
+          },
         }),
-        stderr: new ReadableStream({ start(c) { c.close(); } }),
+        stderr: new ReadableStream({
+          start(c) {
+            c.close();
+          },
+        }),
       }),
     });
 
@@ -45,9 +56,13 @@ describe("EscalationDispatcher", () => {
     };
 
     const dispatcher = new EscalationDispatcher();
-    await dispatcher.dispatch(rule, { contractId: "c1", trigger: "specialist_failed", message: "Specialist crashed" });
+    await dispatcher.dispatch(rule, {
+      contractId: "c1",
+      trigger: "specialist_failed",
+      message: "Specialist crashed",
+    });
 
-    expect((Bun.spawn as ReturnType<typeof vi.fn>)).toHaveBeenCalledOnce();
+    expect(Bun.spawn as ReturnType<typeof vi.fn>).toHaveBeenCalledOnce();
     const [cmd] = (Bun.spawn as ReturnType<typeof vi.fn>).mock.calls[0];
     expect(cmd).toContain("gh");
     expect(cmd).toContain("issue");
@@ -64,7 +79,11 @@ describe("EscalationDispatcher", () => {
     };
 
     const dispatcher = new EscalationDispatcher();
-    await dispatcher.dispatch(rule, { contractId: "c1", trigger: "budget > 80%", message: "Budget near limit" });
+    await dispatcher.dispatch(rule, {
+      contractId: "c1",
+      trigger: "budget > 80%",
+      message: "Budget near limit",
+    });
 
     expect(consoleSpy).toHaveBeenCalled();
     consoleSpy.mockRestore();

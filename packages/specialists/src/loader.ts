@@ -8,7 +8,7 @@ export async function loadSpecialist(manifest: SpecialistManifest): Promise<Spec
   const actualHash = computeCodeHash(fileBytes);
   if (actualHash !== manifest.codeHash) {
     throw new Error(
-      `codeHash mismatch for ${manifest.name}@${manifest.version}: expected ${manifest.codeHash}, got ${actualHash}`
+      `codeHash mismatch for ${manifest.name}@${manifest.version}: expected ${manifest.codeHash}, got ${actualHash}`,
     );
   }
   const mod = await import(manifest.entrypoint);

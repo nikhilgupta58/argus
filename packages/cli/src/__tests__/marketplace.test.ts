@@ -1,4 +1,4 @@
-import { describe, it, expect } from "vitest";
+import { describe, expect, it } from "vitest";
 import { marketplaceCommand } from "../commands/marketplace.js";
 
 describe("marketplaceCommand", () => {
@@ -14,9 +14,9 @@ describe("marketplaceCommand", () => {
 
   it("revoke subcommand accepts a bundleHash argument", () => {
     const revokeCmd = marketplaceCommand.commands.find(
-      (c: { name(): string }) => c.name() === "revoke"
+      (c: { name(): string }) => c.name() === "revoke",
     );
     expect(revokeCmd).toBeDefined();
-    expect(revokeCmd!.registeredArguments.length).toBeGreaterThan(0);
+    expect(revokeCmd?.registeredArguments.length).toBeGreaterThan(0);
   });
 });

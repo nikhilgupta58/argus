@@ -1,4 +1,4 @@
-import { describe, it, expect } from "vitest";
+import { describe, expect, it } from "vitest";
 import { publisherCommand } from "../commands/publisher.js";
 
 describe("publisherCommand", () => {
@@ -15,10 +15,10 @@ describe("publisherCommand", () => {
 
   it("register subcommand has --name option", () => {
     const registerCmd = publisherCommand.commands.find(
-      (c: { name(): string }) => c.name() === "register"
+      (c: { name(): string }) => c.name() === "register",
     );
     expect(registerCmd).toBeDefined();
-    const opts = registerCmd!.options.map((o: { long: string }) => o.long);
+    const opts = registerCmd?.options.map((o: { long: string }) => o.long);
     expect(opts).toContain("--name");
   });
 });

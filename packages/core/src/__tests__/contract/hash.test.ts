@@ -1,4 +1,4 @@
-import { describe, it, expect } from "vitest";
+import { describe, expect, it } from "vitest";
 import { contractHash } from "../../contract/hash.js";
 import { parseContract } from "../../contract/parser.js";
 

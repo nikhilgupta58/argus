@@ -1,6 +1,6 @@
-import { describe, it, expect } from "vitest";
-import { weeklyReportSpecialist } from "../index.js";
+import { describe, expect, it } from "vitest";
 import type { SpecialistContext } from "../../../types.js";
+import { weeklyReportSpecialist } from "../index.js";
 
 const makeCtx = (): SpecialistContext => ({
   contractId: "c2",
@@ -36,7 +36,7 @@ describe("WeeklyReportSpecialist", () => {
     expect(result.ok).toBe(true);
     if (result.ok) {
       expect(result.value.summary).toContain("report");
-      const report = result.value.artifacts?.["report"] as string;
+      const report = result.value.artifacts?.report as string;
       expect(report).toContain("# Weekly Business Review");
       expect(report).toContain("## Revenue");
       expect(report).toContain("## Signups");

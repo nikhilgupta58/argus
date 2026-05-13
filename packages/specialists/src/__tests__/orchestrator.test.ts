@@ -1,9 +1,9 @@
-import { describe, it, expect, vi, beforeEach } from "vitest";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
-import { Orchestrator } from "../orchestrator.js";
 import { ContractStore } from "@argus/core";
 import { EventStore, generateKeyPair } from "@argus/lineage";
+import { beforeEach, describe, expect, it, vi } from "vitest";
+import { Orchestrator } from "../orchestrator.js";
 import { SpecialistRegistry, computeManifestHash } from "../registry.js";
 import { BunSandbox } from "../sandbox.js";
 import type { SpecialistManifest, SpecialistOutput } from "../types.js";

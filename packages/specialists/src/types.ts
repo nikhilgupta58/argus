@@ -41,7 +41,7 @@ export interface SpecialistManifest {
   name: string;
   version: string;
   contractKinds: string[];
-  entrypoint: string;    // absolute resolved path
-  codeHash: string;      // BLAKE3 hex of entrypoint file bytes
-  manifestHash: string;  // BLAKE3 hex of canonical JSON of all fields except manifestHash
+  entrypoint: string; // absolute resolved path
+  codeHash: string; // BLAKE3 hex of entrypoint file bytes
+  manifestHash: string; // BLAKE3 hex of canonical JSON of all fields except manifestHash
 }

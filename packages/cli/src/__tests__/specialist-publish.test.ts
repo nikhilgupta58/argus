@@ -1,4 +1,4 @@
-import { describe, it, expect } from "vitest";
+import { describe, expect, it } from "vitest";
 import { specialistPublishCommand } from "../commands/specialist-publish.js";
 
 describe("specialistPublishCommand", () => {
@@ -14,10 +14,10 @@ describe("specialistPublishCommand", () => {
 
   it("publish subcommand has --publisher option", () => {
     const publishCmd = specialistPublishCommand.commands.find(
-      (c: { name(): string }) => c.name() === "publish"
+      (c: { name(): string }) => c.name() === "publish",
     );
     expect(publishCmd).toBeDefined();
-    const opts = publishCmd!.options.map((o: { long: string }) => o.long);
+    const opts = publishCmd?.options.map((o: { long: string }) => o.long);
     expect(opts).toContain("--publisher");
   });
 });

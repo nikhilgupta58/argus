@@ -1,18 +1,18 @@
-import { ed25519 } from "@noble/curves/ed25519";
 import { xchacha20poly1305 } from "@noble/ciphers/chacha";
 import { randomBytes } from "@noble/ciphers/webcrypto";
+import { ed25519 } from "@noble/curves/ed25519";
 import { pbkdf2 } from "@noble/hashes/pbkdf2";
 import { sha256 } from "@noble/hashes/sha2";
 import { bytesToHex } from "@noble/hashes/utils";
 
 export interface KeyPair {
   privateKey: Uint8Array; // 32 bytes
-  publicKey: Uint8Array;  // 32 bytes
+  publicKey: Uint8Array; // 32 bytes
 }
 
 export interface KeyPairHex {
   privateKey: string; // 64-char hex
-  publicKey: string;  // 64-char hex
+  publicKey: string; // 64-char hex
 }
 
 // Key file format: version(4 LE) + pbkdf2_salt(32) + xchacha_nonce(24) + encrypted_privkey(48) = 108 bytes

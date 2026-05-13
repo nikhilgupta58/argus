@@ -1,12 +1,12 @@
+import type { ContractStore } from "@argus/core";
+import type { Result } from "@argus/core";
+import { type EventStore, eventId, signEvent } from "@argus/lineage";
+import type { Event } from "@argus/lineage";
 import { blake3 } from "@noble/hashes/blake3";
 import { bytesToHex } from "@noble/hashes/utils";
-import { ContractStore } from "@argus/core";
-import { EventStore, signEvent, eventId } from "@argus/lineage";
-import type { Event } from "@argus/lineage";
-import { SpecialistRegistry } from "./registry.js";
-import { BunSandbox } from "./sandbox.js";
-import type { SpecialistContext, SpecialistOutput, SpecialistError } from "./types.js";
-import type { Result } from "@argus/core";
+import type { SpecialistRegistry } from "./registry.js";
+import type { BunSandbox } from "./sandbox.js";
+import type { SpecialistContext, SpecialistError, SpecialistOutput } from "./types.js";
 
 const encoder = new TextEncoder();
 
@@ -96,7 +96,7 @@ export class Orchestrator {
     const result = await this.sandbox.run(manifest.entrypoint, ctx);
 
     // Fetch the latest event again (specialist may have appended its own events)
-    const postLatest = this.eventStore.getLatest(contractId)!;
+    const postLatest = this.eventStore.getLatest(contractId) ?? preLatest;
 
     if (result.ok) {
       const completedPayload = {

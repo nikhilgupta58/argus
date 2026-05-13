@@ -1,31 +1,30 @@
-import { Command } from "commander";
-import { readFileSync, existsSync } from "node:fs";
+import { existsSync, readFileSync } from "node:fs";
 import { resolve } from "node:path";
-import pc from "picocolors";
-import { SpecialistRegistry, computeManifestHash, computeCodeHash } from "@argus/specialists";
+import { SpecialistRegistry, computeCodeHash, computeManifestHash } from "@argus/specialists";
 import type { SpecialistManifest } from "@argus/specialists";
+import { Command } from "commander";
+import pc from "picocolors";
+import type { BundleManifest } from "../marketplace/bundle.js";
 
-const DEFAULT_REGISTRY = resolve(process.env["HOME"] ?? "~", ".argus", "registry.json");
+const DEFAULT_REGISTRY = resolve(process.env.HOME ?? "~", ".argus", "registry.json");
 
 function getRegistry(): SpecialistRegistry {
   return new SpecialistRegistry(DEFAULT_REGISTRY);
 }
 
-const listCmd = new Command("list")
-  .description("List all installed specialists")
-  .action(() => {
-    const reg = getRegistry();
-    const specialists = reg.list();
-    if (specialists.length === 0) {
-      console.log(pc.dim("No specialists installed."));
-      return;
-    }
-    for (const s of specialists) {
-      console.log(
-        `${pc.green(s.name)}@${pc.cyan(s.version)}  ${pc.dim(s.manifestHash.slice(0, 12))}  kinds: ${s.contractKinds.join(", ")}`
-      );
-    }
-  });
+const listCmd = new Command("list").description("List all installed specialists").action(() => {
+  const reg = getRegistry();
+  const specialists = reg.list();
+  if (specialists.length === 0) {
+    console.log(pc.dim("No specialists installed."));
+    return;
+  }
+  for (const s of specialists) {
+    console.log(
+      `${pc.green(s.name)}@${pc.cyan(s.version)}  ${pc.dim(s.manifestHash.slice(0, 12))}  kinds: ${s.contractKinds.join(", ")}`,
+    );
+  }
+});
 
 const installCmd = new Command("install")
   .description("Install a specialist from a file path (content-addressed)")
@@ -38,7 +37,11 @@ const installCmd = new Command("install")
     }
 
     const fileBuffer = readFileSync(absPath);
-    const fileBytes = new Uint8Array(fileBuffer.buffer, fileBuffer.byteOffset, fileBuffer.byteLength);
+    const fileBytes = new Uint8Array(
+      fileBuffer.buffer,
+      fileBuffer.byteOffset,
+      fileBuffer.byteLength,
+    );
     const codeHash = computeCodeHash(fileBytes);
 
     const mod = await import(absPath).catch(() => null);
@@ -48,7 +51,11 @@ const installCmd = new Command("install")
     }
 
     const s = mod.default;
-    if (typeof s.name !== "string" || typeof s.version !== "string" || !Array.isArray(s.contractKinds)) {
+    if (
+      typeof s.name !== "string" ||
+      typeof s.version !== "string" ||
+      !Array.isArray(s.contractKinds)
+    ) {
       console.error(pc.red("Specialist default export must have name, version, and contractKinds"));
       process.exit(1);
     }
@@ -83,7 +90,9 @@ const removeCmd = new Command("remove")
   });
 
 const installBundleCmd = new Command("install-bundle")
-  .description("Install a specialist from a signed .tar.gz bundle (verifies signature and checks revocation)")
+  .description(
+    "Install a specialist from a signed .tar.gz bundle (verifies signature and checks revocation)",
+  )
   .argument("<bundle>", "Path to the .tar.gz bundle file")
   .action(async (bundlePath: string) => {
     const { readFileSync: readFS } = await import("node:fs");
@@ -100,11 +109,12 @@ const installBundleCmd = new Command("install-bundle")
 
     const tarBytes = readFS(absPath);
     const bundleHash = bytesToHex(
-      blake3(new Uint8Array(tarBytes.buffer, tarBytes.byteOffset, tarBytes.byteLength))
+      blake3(new Uint8Array(tarBytes.buffer, tarBytes.byteOffset, tarBytes.byteLength)),
     );
 
-    const dbPath = process.env["ARGUS_MARKETPLACE_DB"] ??
-      resolve(process.env["HOME"] ?? "~", ".argus", "marketplace.db");
+    const dbPath =
+      process.env.ARGUS_MARKETPLACE_DB ??
+      resolve(process.env.HOME ?? "~", ".argus", "marketplace.db");
     const store = new PublisherStore(dbPath);
     let isRevoked = false;
     try {
@@ -114,11 +124,13 @@ const installBundleCmd = new Command("install-bundle")
     }
 
     if (isRevoked) {
-      console.error(pc.red(`Bundle ${bundleHash.slice(0, 16)}... has been revoked and cannot be installed.`));
+      console.error(
+        pc.red(`Bundle ${bundleHash.slice(0, 16)}... has been revoked and cannot be installed.`),
+      );
       process.exit(1);
     }
 
-    let manifest;
+    let manifest: BundleManifest;
     try {
       manifest = await verifyBundle(absPath);
     } catch (e) {
@@ -127,9 +139,15 @@ const installBundleCmd = new Command("install-bundle")
     }
 
     console.log(pc.green(`Signature verified for ${manifest.name}@${manifest.version}`));
-    console.log(`  publisher:  ${manifest.publisherIdentity.name} (${manifest.publisherIdentity.id})`);
+    console.log(
+      `  publisher:  ${manifest.publisherIdentity.name} (${manifest.publisherIdentity.id})`,
+    );
     console.log(`  bundleHash: ${bundleHash.slice(0, 16)}...`);
-    console.log(pc.dim("  (Verified bundle — install to local registry with argus fleet install <entrypoint>)"));
+    console.log(
+      pc.dim(
+        "  (Verified bundle — install to local registry with argus fleet install <entrypoint>)",
+      ),
+    );
   });
 
 export const fleetCommand = new Command("fleet")

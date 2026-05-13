@@ -1,4 +1,4 @@
-import type { SignedEvent, ActionKind } from "../event/types.js";
+import type { ActionKind, SignedEvent } from "../event/types.js";
 
 export interface ReplayState {
   contractId: string;
@@ -12,7 +12,7 @@ export interface ReplayState {
 export function replayChain(events: SignedEvent[]): ReplayState {
   if (events.length === 0) throw new Error("cannot replay empty event chain");
   const sorted = [...events].sort((a, b) => a.sequence - b.sequence);
-  const last = sorted[sorted.length - 1]!;
+  const last = sorted[sorted.length - 1] as SignedEvent;
   return {
     contractId: last.contract_id,
     eventCount: sorted.length,

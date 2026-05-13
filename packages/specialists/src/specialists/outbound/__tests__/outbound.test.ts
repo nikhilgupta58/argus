@@ -1,4 +1,4 @@
-import { describe, it, expect, vi, beforeEach } from "vitest";
+import { beforeEach, describe, expect, it, vi } from "vitest";
 import type { SpecialistContext } from "../../../types.js";
 
 // vi.mock is hoisted to the top — define it once with a controllable spy
@@ -58,7 +58,7 @@ describe("OutboundSpecialist", () => {
     expect(result.ok).toBe(true);
     if (result.ok) {
       expect(result.value.summary).toContain("drafted");
-      expect(result.value.artifacts?.["drafted"]).toContain("Jane");
+      expect(result.value.artifacts?.drafted).toContain("Jane");
       expect(result.value.tokensUsed).toBe(450);
     }
   });

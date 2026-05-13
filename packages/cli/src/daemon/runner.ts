@@ -1,12 +1,12 @@
-import { readFileSync, existsSync } from "node:fs";
-import pc from "picocolors";
+import { existsSync, readFileSync } from "node:fs";
 import { ContractStore } from "@argus/core";
 import { EventStore, decryptKeyPair } from "@argus/lineage";
-import { SpecialistRegistry, BunSandbox, Orchestrator } from "@argus/specialists";
+import { BunSandbox, Orchestrator, SpecialistRegistry } from "@argus/specialists";
+import pc from "picocolors";
 import { BudgetTracker } from "./budget.js";
-import { EscalationDispatcher } from "./escalation.js";
 import { extractCronPolicy, scheduleCron } from "./cron.js";
 import type { CronJob } from "./cron.js";
+import { EscalationDispatcher } from "./escalation.js";
 
 export interface DaemonConfig {
   dbPath: string;

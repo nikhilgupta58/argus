@@ -1,6 +1,11 @@
 import Anthropic from "@anthropic-ai/sdk";
-import type { Specialist, SpecialistContext, SpecialistOutput, SpecialistError } from "../../types.js";
 import type { Result } from "@argus/core";
+import type {
+  Specialist,
+  SpecialistContext,
+  SpecialistError,
+  SpecialistOutput,
+} from "../../types.js";
 
 const anthropic = new Anthropic();
 
@@ -11,11 +16,11 @@ export const outboundSpecialist: Specialist = {
 
   async execute(ctx: SpecialistContext): Promise<Result<SpecialistOutput, SpecialistError>> {
     const meta = ctx.contract.metadata ?? {};
-    const prospectName = String(meta["prospect_name"] ?? "");
-    const prospectEmail = String(meta["prospect_email"] ?? "");
-    const prospectCompany = String(meta["prospect_company"] ?? "");
-    const prospectRole = String(meta["prospect_role"] ?? "");
-    const rubric = String(meta["rubric"] ?? "Be concise and value-focused");
+    const prospectName = String(meta.prospect_name ?? "");
+    const prospectEmail = String(meta.prospect_email ?? "");
+    const prospectCompany = String(meta.prospect_company ?? "");
+    const prospectRole = String(meta.prospect_role ?? "");
+    const rubric = String(meta.rubric ?? "Be concise and value-focused");
 
     if (!prospectName || !prospectEmail) {
       return {

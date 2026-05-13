@@ -1,9 +1,9 @@
+import { existsSync, mkdirSync, readFileSync } from "node:fs";
+import { ContractStore, contractHash, diffContracts, parseContract } from "@argus/core";
 import { Command } from "commander";
-import { readFileSync, existsSync, mkdirSync } from "node:fs";
 import pc from "picocolors";
-import { parseContract, contractHash, diffContracts, ContractStore } from "@argus/core";
 
-const DB_PATH = process.env["ARGUS_DB"] ?? `${process.env["HOME"]}/.argus/argus.db`;
+const DB_PATH = process.env.ARGUS_DB ?? `${process.env.HOME}/.argus/argus.db`;
 
 function getStore(): ContractStore {
   const dir = DB_PATH.replace(/\/[^/]+$/, "");
@@ -13,8 +13,7 @@ function getStore(): ContractStore {
   return new ContractStore(DB_PATH);
 }
 
-export const contractCommand = new Command("contract")
-  .description("Manage Outcome Contracts");
+export const contractCommand = new Command("contract").description("Manage Outcome Contracts");
 
 contractCommand
   .command("validate <file>")
@@ -87,13 +86,19 @@ contractCommand
       process.exit(1);
     }
     if (latest.version === result.value.version) {
-      console.error(pc.red(`Version ${result.value.version} already exists. Bump the version field.`));
+      console.error(
+        pc.red(`Version ${result.value.version} already exists. Bump the version field.`),
+      );
       store.close();
       process.exit(1);
     }
     store.save(result.value, latest.version);
     store.close();
-    console.log(pc.green(`✓ Contract updated: ${result.value.id} v${latest.version} → v${result.value.version}`));
+    console.log(
+      pc.green(
+        `✓ Contract updated: ${result.value.id} v${latest.version} → v${result.value.version}`,
+      ),
+    );
     console.log(`  hash: ${contractHash(result.value)}`);
   });
 
@@ -131,8 +136,14 @@ contractCommand
     const a = store.load(id, versionA);
     const b = store.load(id, versionB);
     store.close();
-    if (!a) { console.error(pc.red(`Version ${versionA} not found`)); process.exit(1); }
-    if (!b) { console.error(pc.red(`Version ${versionB} not found`)); process.exit(1); }
+    if (!a) {
+      console.error(pc.red(`Version ${versionA} not found`));
+      process.exit(1);
+    }
+    if (!b) {
+      console.error(pc.red(`Version ${versionB} not found`));
+      process.exit(1);
+    }
     const changes = diffContracts(a, b);
     if (changes.length === 0) {
       console.log(pc.green("No semantic changes between versions"));

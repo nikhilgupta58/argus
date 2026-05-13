@@ -1,5 +1,8 @@
 export class SQLiteError extends Error {
-  constructor(message: string, public readonly code?: string) {
+  constructor(
+    message: string,
+    public readonly code?: string,
+  ) {
     super(message);
     this.name = "SQLiteError";
   }
@@ -25,8 +28,8 @@ function parseSql(sql: string): { type: string; table: string } {
     return { type: "SELECT", table: m?.[1] ?? "" };
   }
   if (s.startsWith("CREATE TABLE")) {
-    const m = sql.match(/CREATE TABLE IF NOT EXISTS\s+(\w+)/i) ??
-              sql.match(/CREATE TABLE\s+(\w+)/i);
+    const m =
+      sql.match(/CREATE TABLE IF NOT EXISTS\s+(\w+)/i) ?? sql.match(/CREATE TABLE\s+(\w+)/i);
     return { type: "CREATE_TABLE", table: m?.[1] ?? "" };
   }
   if (s.startsWith("CREATE INDEX")) {
@@ -44,9 +47,13 @@ function splitTopLevelCommas(s: string): string[] {
   let depth = 0;
   let current = "";
   for (const ch of s) {
-    if (ch === "(") { depth++; current += ch; }
-    else if (ch === ")") { depth--; current += ch; }
-    else if (ch === "," && depth === 0) {
+    if (ch === "(") {
+      depth++;
+      current += ch;
+    } else if (ch === ")") {
+      depth--;
+      current += ch;
+    } else if (ch === "," && depth === 0) {
       parts.push(current.trim());
       current = "";
     } else {
@@ -57,7 +64,11 @@ function splitTopLevelCommas(s: string): string[] {
   return parts;
 }
 
-function extractColumns(createSql: string): { columns: string[]; primaryKey: string | null; uniqueConstraints: string[][] } {
+function extractColumns(createSql: string): {
+  columns: string[];
+  primaryKey: string | null;
+  uniqueConstraints: string[][];
+} {
   // Extract the body between the outermost parentheses of CREATE TABLE
   const bodyMatch = createSql.match(/\((.+)\)(?:\s+STRICT)?[^)]*$/is);
   if (!bodyMatch) return { columns: [], primaryKey: null, uniqueConstraints: [] };
@@ -80,7 +91,7 @@ function extractColumns(createSql: string): { columns: string[]; primaryKey: str
         // Treat composite PK as a unique constraint (enforced the same way)
         uniqueConstraints.push(pkCols);
         // If single-column PK, also set primaryKey for legacy checks
-        if (pkCols.length === 1) primaryKey = pkCols[0]!;
+        if (pkCols.length === 1) primaryKey = pkCols[0] as string;
       }
       continue;
     }
@@ -112,8 +123,6 @@ function extractColumns(createSql: string): { columns: string[]; primaryKey: str
 export class Database {
   private tables: Map<string, TableData> = new Map();
   private _nextRowid = 1;
-
-  constructor(_path?: string, _opts?: unknown) {}
 
   run(sql: string, ..._args: unknown[]): void {
     const { type, table } = parseSql(sql);
@@ -149,17 +158,17 @@ export class Database {
           // Check UNIQUE constraints (including PRIMARY KEY, which is registered as a unique constraint)
           for (const constraint of tableData.uniqueConstraints) {
             const existing = tableData.rows.find((r) =>
-              constraint.every((col) => r[col] === row[col])
+              constraint.every((col) => r[col] === row[col]),
             );
             if (existing) {
               throw new SQLiteError(
                 `UNIQUE constraint failed: ${constraint.map((c) => `${table}.${c}`).join(", ")}`,
-                "SQLITE_CONSTRAINT_UNIQUE"
+                "SQLITE_CONSTRAINT_UNIQUE",
               );
             }
           }
 
-          row["rowid"] = self._nextRowid++;
+          row.rowid = self._nextRowid++;
           tableData.rows.push(row);
         } else if (type === "UNKNOWN") {
           throw new SQLiteError(`Mock: unsupported statement type: ${sql}`);
@@ -243,7 +252,7 @@ export class Database {
     // Parse LIMIT clause
     const limitMatch = sql.match(/LIMIT\s+(\d+)/i);
     if (limitMatch) {
-      results = results.slice(0, parseInt(limitMatch[1], 10));
+      results = results.slice(0, Number.parseInt(limitMatch[1], 10));
     }
 
     // Project only selected columns (SELECT col1, col2, ... FROM)

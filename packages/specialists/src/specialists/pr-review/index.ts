@@ -1,6 +1,11 @@
 import Anthropic from "@anthropic-ai/sdk";
-import type { Specialist, SpecialistContext, SpecialistOutput, SpecialistError } from "../../types.js";
 import type { Result } from "@argus/core";
+import type {
+  Specialist,
+  SpecialistContext,
+  SpecialistError,
+  SpecialistOutput,
+} from "../../types.js";
 
 const anthropic = new Anthropic();
 
@@ -41,10 +46,10 @@ export const prReviewSpecialist: Specialist = {
 
   async execute(ctx: SpecialistContext): Promise<Result<SpecialistOutput, SpecialistError>> {
     const meta = ctx.contract.metadata ?? {};
-    const repo = String(meta["repo"] ?? "").trim();
-    const prNumberStr = String(meta["pr_number"] ?? "").trim();
+    const repo = String(meta.repo ?? "").trim();
+    const prNumberStr = String(meta.pr_number ?? "").trim();
     const rubric = String(
-      meta["rubric"] ?? "Review for code quality, security, and test coverage"
+      meta.rubric ?? "Review for code quality, security, and test coverage",
     ).trim();
 
     if (!repo || !prNumberStr) {
@@ -57,8 +62,8 @@ export const prReviewSpecialist: Specialist = {
       };
     }
 
-    const prNumber = parseInt(prNumberStr, 10);
-    if (isNaN(prNumber)) {
+    const prNumber = Number.parseInt(prNumberStr, 10);
+    if (Number.isNaN(prNumber)) {
       return {
         ok: false,
         error: { code: "EXECUTION_ERROR", message: `Invalid pr_number: ${prNumberStr}` },
@@ -103,9 +108,9 @@ export const prReviewSpecialist: Specialist = {
 
 Repo: ${repo}
 PR #${prNumber}
-Title: ${prData["title"]}
-Description: ${prData["body"]}
-Additions: ${prData["additions"]} lines, Deletions: ${prData["deletions"]} lines
+Title: ${prData.title}
+Description: ${prData.body}
+Additions: ${prData.additions} lines, Deletions: ${prData.deletions} lines
 
 Rubric:
 ${rubric}
@@ -120,20 +125,11 @@ Provide a structured review with: summary, issues found (if any), and a LGTM/NEE
         .map((b) => b.text)
         .join("");
 
-      const tokensUsed =
-        (response.usage?.input_tokens ?? 0) + (response.usage?.output_tokens ?? 0);
+      const tokensUsed = (response.usage?.input_tokens ?? 0) + (response.usage?.output_tokens ?? 0);
 
       // Post comment via gh CLI (best-effort)
       const commentBody = `<!-- argus-pr-review -->\n${review}`;
-      await ghSpawn([
-        "pr",
-        "comment",
-        String(prNumber),
-        "--repo",
-        repo,
-        "--body",
-        commentBody,
-      ]);
+      await ghSpawn(["pr", "comment", String(prNumber), "--repo", repo, "--body", commentBody]);
 
       return {
         ok: true,

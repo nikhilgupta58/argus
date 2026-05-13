@@ -1,7 +1,7 @@
 import { resolve } from "node:path";
 import { fileURLToPath } from "node:url";
-import type { SpecialistContext, SpecialistOutput, SpecialistError } from "./types.js";
 import type { Result } from "@argus/core";
+import type { SpecialistContext, SpecialistError, SpecialistOutput } from "./types.js";
 
 const SANDBOX_TIMEOUT_MS = 30_000;
 const workerPath = resolve(fileURLToPath(import.meta.url), "../sandbox-worker.ts");
@@ -10,7 +10,7 @@ export class BunSandbox {
   async run(
     entrypoint: string,
     ctx: SpecialistContext,
-    timeoutMs = SANDBOX_TIMEOUT_MS
+    timeoutMs = SANDBOX_TIMEOUT_MS,
   ): Promise<Result<SpecialistOutput, SpecialistError>> {
     let proc: ReturnType<typeof Bun.spawn> | null = null;
     const timeoutHandle = setTimeout(() => proc?.kill(), timeoutMs);
@@ -32,7 +32,10 @@ export class BunSandbox {
         const stderr = await new Response(proc.stderr).text();
         return {
           ok: false,
-          error: { code: "SANDBOX_ERROR", message: `Process exited with code ${exitCode}: ${stderr}` },
+          error: {
+            code: "SANDBOX_ERROR",
+            message: `Process exited with code ${exitCode}: ${stderr}`,
+          },
         };
       }
 

@@ -1,5 +1,10 @@
-import type { Specialist, SpecialistContext, SpecialistOutput, SpecialistError } from "../../types.js";
 import type { Result } from "@argus/core";
+import type {
+  Specialist,
+  SpecialistContext,
+  SpecialistError,
+  SpecialistOutput,
+} from "../../types.js";
 
 // Stub data fetchers — replace with real API calls in production
 function fetchDataSource(source: string): Record<string, unknown> {
@@ -9,7 +14,7 @@ function fetchDataSource(source: string): Record<string, unknown> {
     churn: { current_week: 14, prev_week: 18, change_pct: -22.2 },
     default: { note: "stub data — configure real data source integration" },
   };
-  return stubs[source] ?? stubs["default"]!;
+  return stubs[source] ?? stubs.default;
 }
 
 function renderSection(source: string, data: Record<string, unknown>): string {
@@ -27,16 +32,22 @@ export const weeklyReportSpecialist: Specialist = {
 
   async execute(ctx: SpecialistContext): Promise<Result<SpecialistOutput, SpecialistError>> {
     const meta = ctx.contract.metadata ?? {};
-    const rawSources = String(meta["data_sources"] ?? "").trim();
+    const rawSources = String(meta.data_sources ?? "").trim();
     if (!rawSources) {
       return {
         ok: false,
-        error: { code: "EXECUTION_ERROR", message: "No data_sources configured in contract metadata" },
+        error: {
+          code: "EXECUTION_ERROR",
+          message: "No data_sources configured in contract metadata",
+        },
       };
     }
 
-    const title = String(meta["report_title"] ?? "Weekly Report");
-    const sources = rawSources.split(",").map((s) => s.trim()).filter(Boolean);
+    const title = String(meta.report_title ?? "Weekly Report");
+    const sources = rawSources
+      .split(",")
+      .map((s) => s.trim())
+      .filter(Boolean);
     const date = new Date().toISOString().slice(0, 10);
 
     const sections = sources.map((src) => {

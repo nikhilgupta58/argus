@@ -1,5 +1,5 @@
-import { describe, it, expect } from "vitest";
 import * as fc from "fast-check";
+import { describe, expect, it } from "vitest";
 import { verifyChain } from "../../chain/verify.js";
 import type { SignedEvent } from "../../event/types.js";
 
@@ -57,24 +57,21 @@ describe("verifyChain — fuzz malformed inputs", () => {
 
   it("truncated signature is detected as invalid", () => {
     fc.assert(
-      fc.property(
-        fc.string({ minLength: 0, maxLength: 127 }),
-        (shortSig) => {
-          const event: SignedEvent = {
-            id: randomHex(64),
-            contract_id: "fuzz-test",
-            action_kind: "contract_created",
-            payload_blake3: randomHex(64),
-            parent_id: null,
-            timestamp: Date.now(),
-            sequence: 0,
-            signature: shortSig,
-            public_key: randomHex(64),
-          };
-          const result = verifyChain([event]);
-          return result.valid === false;
-        },
-      ),
+      fc.property(fc.string({ minLength: 0, maxLength: 127 }), (shortSig) => {
+        const event: SignedEvent = {
+          id: randomHex(64),
+          contract_id: "fuzz-test",
+          action_kind: "contract_created",
+          payload_blake3: randomHex(64),
+          parent_id: null,
+          timestamp: Date.now(),
+          sequence: 0,
+          signature: shortSig,
+          public_key: randomHex(64),
+        };
+        const result = verifyChain([event]);
+        return result.valid === false;
+      }),
       { numRuns: 200 },
     );
   });

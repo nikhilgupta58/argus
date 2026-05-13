@@ -1,4 +1,4 @@
-import { describe, it, expect } from "vitest";
+import { describe, expect, it } from "vitest";
 import { DaemonRunner } from "../runner.js";
 
 describe("DaemonRunner", () => {
@@ -9,7 +9,7 @@ describe("DaemonRunner", () => {
 
   it("throws if started twice without stopping", async () => {
     const runner = new DaemonRunner();
-    (runner as unknown as Record<string, unknown>)["running"] = true;
+    (runner as unknown as Record<string, unknown>).running = true;
     await expect(
       runner.start({
         dbPath: ":memory:",
@@ -23,7 +23,7 @@ describe("DaemonRunner", () => {
 
   it("stop() sets isRunning() to false", () => {
     const runner = new DaemonRunner();
-    (runner as unknown as Record<string, unknown>)["running"] = true;
+    (runner as unknown as Record<string, unknown>).running = true;
     runner.stop();
     expect(runner.isRunning()).toBe(false);
   });

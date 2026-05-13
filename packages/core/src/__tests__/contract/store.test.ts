@@ -1,7 +1,7 @@
-import { describe, it, expect, beforeEach, afterEach } from "vitest";
-import { ContractStore } from "../../contract/store.js";
-import { parseContract } from "../../contract/parser.js";
 import { rmSync } from "node:fs";
+import { afterEach, beforeEach, describe, expect, it } from "vitest";
+import { parseContract } from "../../contract/parser.js";
+import { ContractStore } from "../../contract/store.js";
 
 const DB_PATH = "/tmp/argus-test-store.db";
 
@@ -29,9 +29,10 @@ channel = "email"
 contact = "test@example.com"
 `;
 
-const TOML_V2 = TOML_V1
-  .replace('version = "1.0.0"', 'version = "2.0.0"')
-  .replace('outcome = "Store test v1"', 'outcome = "Store test v2"');
+const TOML_V2 = TOML_V1.replace('version = "1.0.0"', 'version = "2.0.0"').replace(
+  'outcome = "Store test v1"',
+  'outcome = "Store test v2"',
+);
 
 describe("ContractStore", () => {
   let store: ContractStore;
@@ -42,7 +43,9 @@ describe("ContractStore", () => {
 
   afterEach(() => {
     store.close();
-    try { rmSync(DB_PATH); } catch {}
+    try {
+      rmSync(DB_PATH);
+    } catch {}
   });
 
   it("saves and loads a contract by id+version", () => {

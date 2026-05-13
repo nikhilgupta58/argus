@@ -1,12 +1,12 @@
-import { describe, it, expect } from "vitest";
-import { replayChain } from "../../chain/replay.js";
+import { ed25519 } from "@noble/curves/ed25519";
+import { describe, expect, it } from "vitest";
 import { diffChain } from "../../chain/diff.js";
-import { signEvent } from "../../signing/sign.js";
-import { eventId } from "../../event/hash.js";
+import { replayChain } from "../../chain/replay.js";
 import { createRevertEvent } from "../../chain/revert.js";
 import { verifyChain } from "../../chain/verify.js";
-import { ed25519 } from "@noble/curves/ed25519";
+import { eventId } from "../../event/hash.js";
 import type { SignedEvent } from "../../event/types.js";
+import { signEvent } from "../../signing/sign.js";
 
 function makeChain(n: number, key: Uint8Array): SignedEvent[] {
   const events: SignedEvent[] = [];
@@ -15,7 +15,7 @@ function makeChain(n: number, key: Uint8Array): SignedEvent[] {
       contract_id: "replay-test",
       action_kind: "specialist_started" as const,
       payload_blake3: "a".repeat(64),
-      parent_id: i === 0 ? null : events[i - 1]!.id,
+      parent_id: i === 0 ? null : events[i - 1]?.id,
       timestamp: 1_700_000_000_000 + i * 1000,
       sequence: i,
     };
@@ -66,8 +66,8 @@ describe("createRevertEvent", () => {
   it("creates a valid signed revert event extending the chain", () => {
     const key = ed25519.utils.randomPrivateKey();
     const chain = makeChain(3, key);
-    const target = chain[1]!;
-    const latest = chain[2]!;
+    const target = chain[1] as SignedEvent;
+    const latest = chain[2] as SignedEvent;
     const revert = createRevertEvent(target, latest, key);
     expect(revert.action_kind).toBe("revert");
     expect(revert.parent_id).toBe(latest.id);
@@ -77,7 +77,7 @@ describe("createRevertEvent", () => {
   it("revert event is itself verifiable (signature is valid)", () => {
     const key = ed25519.utils.randomPrivateKey();
     const chain = makeChain(3, key);
-    const revert = createRevertEvent(chain[1]!, chain[2]!, key);
+    const revert = createRevertEvent(chain[1] as SignedEvent, chain[2] as SignedEvent, key);
     const fullChain = [...chain, revert];
     expect(verifyChain(fullChain).valid).toBe(true);
   });
@@ -85,7 +85,7 @@ describe("createRevertEvent", () => {
   it("reverts are replayable — replay shows hasRevert=true", () => {
     const key = ed25519.utils.randomPrivateKey();
     const chain = makeChain(3, key);
-    const revert = createRevertEvent(chain[1]!, chain[2]!, key);
+    const revert = createRevertEvent(chain[1] as SignedEvent, chain[2] as SignedEvent, key);
     const state = replayChain([...chain, revert]);
     expect(state.hasRevert).toBe(true);
     expect(state.eventCount).toBe(4);

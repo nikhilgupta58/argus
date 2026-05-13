@@ -1,10 +1,10 @@
-import { describe, it, expect } from "vitest";
-import * as fc from "fast-check";
-import { verifyChain } from "../../chain/verify.js";
-import { signEvent } from "../../signing/sign.js";
-import { eventId } from "../../event/hash.js";
 import { ed25519 } from "@noble/curves/ed25519";
+import * as fc from "fast-check";
+import { describe, expect, it } from "vitest";
+import { verifyChain } from "../../chain/verify.js";
+import { eventId } from "../../event/hash.js";
 import type { SignedEvent } from "../../event/types.js";
+import { signEvent } from "../../signing/sign.js";
 
 function buildChain(n: number, privateKey: Uint8Array): SignedEvent[] {
   const events: SignedEvent[] = [];
@@ -13,7 +13,7 @@ function buildChain(n: number, privateKey: Uint8Array): SignedEvent[] {
       contract_id: "prop-test",
       action_kind: "specialist_started" as const,
       payload_blake3: "a".repeat(64),
-      parent_id: i === 0 ? null : events[i - 1]!.id,
+      parent_id: i === 0 ? null : events[i - 1]?.id,
       timestamp: 1_700_000_000_000 + i * 1000,
       sequence: i,
     };
@@ -25,14 +25,11 @@ function buildChain(n: number, privateKey: Uint8Array): SignedEvent[] {
 describe("verifyChain — property tests", () => {
   it("any valid chain of 1–100 events always passes verification", () => {
     fc.assert(
-      fc.property(
-        fc.integer({ min: 1, max: 100 }),
-        (n) => {
-          const key = ed25519.utils.randomPrivateKey();
-          const chain = buildChain(n, key);
-          return verifyChain(chain).valid === true;
-        },
-      ),
+      fc.property(fc.integer({ min: 1, max: 100 }), (n) => {
+        const key = ed25519.utils.randomPrivateKey();
+        const chain = buildChain(n, key);
+        return verifyChain(chain).valid === true;
+      }),
       { numRuns: 200 },
     );
   });
@@ -47,7 +44,10 @@ describe("verifyChain — property tests", () => {
           const key = ed25519.utils.randomPrivateKey();
           const chain = buildChain(n, key);
           const tampered = [...chain];
-          tampered[mutateIdx] = { ...tampered[mutateIdx]!, contract_id: "TAMPERED-" + mutateIdx };
+          tampered[mutateIdx] = {
+            ...(tampered[mutateIdx] as SignedEvent),
+            contract_id: `TAMPERED-${mutateIdx}`,
+          };
           return verifyChain(tampered).valid === false;
         },
       ),
@@ -65,15 +65,12 @@ describe("verifyChain — property tests", () => {
 
   it("shuffling events does not affect validity (verifyChain sorts by sequence)", () => {
     fc.assert(
-      fc.property(
-        fc.integer({ min: 2, max: 30 }),
-        (n) => {
-          const key = ed25519.utils.randomPrivateKey();
-          const chain = buildChain(n, key);
-          const shuffled = [...chain].sort(() => Math.random() - 0.5);
-          return verifyChain(shuffled).valid === true;
-        },
-      ),
+      fc.property(fc.integer({ min: 2, max: 30 }), (n) => {
+        const key = ed25519.utils.randomPrivateKey();
+        const chain = buildChain(n, key);
+        const shuffled = [...chain].sort(() => Math.random() - 0.5);
+        return verifyChain(shuffled).valid === true;
+      }),
       { numRuns: 100 },
     );
   });

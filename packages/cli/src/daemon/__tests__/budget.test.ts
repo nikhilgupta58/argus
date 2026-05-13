@@ -1,4 +1,4 @@
-import { describe, it, expect } from "vitest";
+import { describe, expect, it } from "vitest";
 import { BudgetTracker } from "../budget.js";
 
 const makeContractBudget = (tokens: number, usd: number, hard_cap = true) => ({
@@ -11,7 +11,11 @@ describe("BudgetTracker", () => {
   it("allows first invocation when budget is full", () => {
     const tracker = new BudgetTracker();
     const budget = makeContractBudget(1000, 5);
-    expect(tracker.check("c1", budget)).toEqual({ allowed: true, tokensRemaining: 1000, usdRemaining: 5 });
+    expect(tracker.check("c1", budget)).toEqual({
+      allowed: true,
+      tokensRemaining: 1000,
+      usdRemaining: 5,
+    });
   });
 
   it("records spend and reduces remaining budget", () => {

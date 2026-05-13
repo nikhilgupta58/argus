@@ -1,11 +1,11 @@
-import { describe, it, expect } from "vitest";
+import { ed25519 } from "@noble/curves/ed25519";
+import { describe, expect, it } from "vitest";
 import {
-  generateKeyPair,
-  encryptKeyPair,
   decryptKeyPair,
+  encryptKeyPair,
+  generateKeyPair,
   keyPairToHex,
 } from "../../signing/keys.js";
-import { ed25519 } from "@noble/curves/ed25519";
 
 describe("generateKeyPair", () => {
   it("returns 32-byte private and public keys", () => {

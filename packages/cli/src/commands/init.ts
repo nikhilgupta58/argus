@@ -1,10 +1,14 @@
-import { Command } from "commander";
-import { createInterface } from "node:readline";
-import { writeFileSync, existsSync } from "node:fs";
+import { existsSync, writeFileSync } from "node:fs";
 import { resolve } from "node:path";
+import { createInterface } from "node:readline";
+import { Command } from "commander";
 import pc from "picocolors";
 
-function ask(rl: ReturnType<typeof createInterface>, question: string, defaultValue?: string): Promise<string> {
+function ask(
+  rl: ReturnType<typeof createInterface>,
+  question: string,
+  defaultValue?: string,
+): Promise<string> {
   return new Promise((resolve) => {
     const prompt = defaultValue ? `${question} (${pc.dim(defaultValue)}): ` : `${question}: `;
     rl.question(prompt, (answer) => {
@@ -13,7 +17,11 @@ function ask(rl: ReturnType<typeof createInterface>, question: string, defaultVa
   });
 }
 
-function askYesNo(rl: ReturnType<typeof createInterface>, question: string, defaultYes = true): Promise<boolean> {
+function askYesNo(
+  rl: ReturnType<typeof createInterface>,
+  question: string,
+  defaultYes = true,
+): Promise<boolean> {
   const hint = defaultYes ? "Y/n" : "y/N";
   return new Promise((resolve) => {
     rl.question(`${question} [${hint}]: `, (answer) => {
@@ -25,11 +33,13 @@ function askYesNo(rl: ReturnType<typeof createInterface>, question: string, defa
 }
 
 function slugify(text: string): string {
-  return text
-    .toLowerCase()
-    .replace(/[^a-z0-9]+/g, "-")
-    .replace(/^-+|-+$/g, "")
-    .slice(0, 48) || "my-contract";
+  return (
+    text
+      .toLowerCase()
+      .replace(/[^a-z0-9]+/g, "-")
+      .replace(/^-+|-+$/g, "")
+      .slice(0, 48) || "my-contract"
+  );
 }
 
 function sixMonthsFromNow(): string {
@@ -50,11 +60,19 @@ export const initCommand = new Command("init")
 
     try {
       // Step 1: Outcome
-      const outcome = await ask(rl, pc.cyan("What should your agent accomplish?"), "Draft outreach emails to 10 potential customers");
+      const outcome = await ask(
+        rl,
+        pc.cyan("What should your agent accomplish?"),
+        "Draft outreach emails to 10 potential customers",
+      );
 
       // Step 2: Deadline
       const defaultDeadline = sixMonthsFromNow().slice(0, 10); // YYYY-MM-DD
-      const deadlineInput = await ask(rl, pc.cyan("What's the deadline? (YYYY-MM-DD)"), defaultDeadline);
+      const deadlineInput = await ask(
+        rl,
+        pc.cyan("What's the deadline? (YYYY-MM-DD)"),
+        defaultDeadline,
+      );
       const deadline = /^\d{4}-\d{2}-\d{2}$/.test(deadlineInput)
         ? `${deadlineInput}T00:00:00Z`
         : `${defaultDeadline}T00:00:00Z`;
@@ -66,11 +84,19 @@ export const initCommand = new Command("init")
       // Step 4: Alert contact
       console.log();
       console.log(pc.dim("When should Argus alert you? (e.g. when budget hits 80%)"));
-      const alertContact = await ask(rl, pc.cyan("Your email or Slack channel for alerts"), "you@example.com");
+      const alertContact = await ask(
+        rl,
+        pc.cyan("Your email or Slack channel for alerts"),
+        "you@example.com",
+      );
       const alertChannel = alertContact.startsWith("#") ? "slack" : "email";
 
       // Step 5: Owner
-      const owner = await ask(rl, pc.cyan("Your email address (contract owner)"), "you@example.com");
+      const owner = await ask(
+        rl,
+        pc.cyan("Your email address (contract owner)"),
+        "you@example.com",
+      );
 
       // Derive contract id and filename
       const contractId = slugify(outcome);
@@ -79,7 +105,11 @@ export const initCommand = new Command("init")
       const outPath = resolve(outDir, filename);
 
       if (existsSync(outPath)) {
-        const overwrite = await askYesNo(rl, pc.yellow(`${filename} already exists. Overwrite?`), false);
+        const overwrite = await askYesNo(
+          rl,
+          pc.yellow(`${filename} already exists. Overwrite?`),
+          false,
+        );
         if (!overwrite) {
           console.log(pc.dim("Aborted. No files written."));
           rl.close();
@@ -88,8 +118,8 @@ export const initCommand = new Command("init")
       }
 
       // Generate TOML
-      const usd = parseFloat(budgetUsd) || 10;
-      const tokens = parseInt(budgetTokens) || 500000;
+      const usd = Number.parseFloat(budgetUsd) || 10;
+      const tokens = Number.parseInt(budgetTokens) || 500000;
 
       const toml = `id = "${contractId}"
 version = "1.0.0"

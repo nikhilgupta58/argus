@@ -1,8 +1,8 @@
-import { describe, it, expect, beforeEach } from "vitest";
+import { rmSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
-import { rmSync } from "node:fs";
-import { SpecialistRegistry, computeManifestHash, computeCodeHash } from "../registry.js";
+import { beforeEach, describe, expect, it } from "vitest";
+import { SpecialistRegistry, computeCodeHash, computeManifestHash } from "../registry.js";
 import type { SpecialistManifest } from "../types.js";
 
 let _counter = 0;
@@ -23,12 +23,24 @@ const makeManifest = (overrides: Partial<SpecialistManifest> = {}): SpecialistMa
 
 describe("computeManifestHash", () => {
   it("is deterministic", () => {
-    const base = { name: "a", version: "1.0.0", contractKinds: ["x"], entrypoint: "/e", codeHash: "h" };
+    const base = {
+      name: "a",
+      version: "1.0.0",
+      contractKinds: ["x"],
+      entrypoint: "/e",
+      codeHash: "h",
+    };
     expect(computeManifestHash(base)).toBe(computeManifestHash(base));
   });
 
   it("changes when any field changes", () => {
-    const base = { name: "a", version: "1.0.0", contractKinds: ["x"], entrypoint: "/e", codeHash: "h" };
+    const base = {
+      name: "a",
+      version: "1.0.0",
+      contractKinds: ["x"],
+      entrypoint: "/e",
+      codeHash: "h",
+    };
     const changed = { ...base, codeHash: "h2" };
     expect(computeManifestHash(base)).not.toBe(computeManifestHash(changed));
   });
@@ -79,7 +91,13 @@ describe("SpecialistRegistry", () => {
   it("findByKind() filters by contractKind", () => {
     const reg = new SpecialistRegistry(registryPath);
     reg.add(makeManifest({ contractKinds: ["outbound"] }));
-    const prBase = { name: "pr-review", version: "1.0.0", contractKinds: ["pr-review"], entrypoint: "/e2", codeHash: "hh" };
+    const prBase = {
+      name: "pr-review",
+      version: "1.0.0",
+      contractKinds: ["pr-review"],
+      entrypoint: "/e2",
+      codeHash: "hh",
+    };
     const prManifest: SpecialistManifest = { ...prBase, manifestHash: computeManifestHash(prBase) };
     reg.add(prManifest);
     expect(reg.findByKind("outbound")).toHaveLength(1);

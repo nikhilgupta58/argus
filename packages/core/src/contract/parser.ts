@@ -23,9 +23,7 @@ export function parseContract(toml: string): Result<Contract, ContractError> {
       ok: false,
       error: {
         code: "SCHEMA_ERROR",
-        message: result.error.issues
-          .map((i) => `${i.path.join(".")}: ${i.message}`)
-          .join("; "),
+        message: result.error.issues.map((i) => `${i.path.join(".")}: ${i.message}`).join("; "),
         details: result.error.issues,
       },
     };
