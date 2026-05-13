@@ -2,9 +2,9 @@
   "name": "@argus/cli",
   "version": "0.0.1",
   "private": true,
-  "main": "./dist/main.js",
+  "main": "./src/main.ts",
   "bin": {
-    "argus": "./dist/main.js"
+    "argus": "./src/main.ts"
   },
   "scripts": {
     "build": "tsc -p tsconfig.json",

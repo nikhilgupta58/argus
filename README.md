@@ -32,8 +32,9 @@ No cloud required. Runs on your machine. Your data stays yours.
 
 ```bash
 # Install from source (see Install section below for binaries)
-git clone https://github.com/nikhilgupta58/argus.git && cd argus
-bun install && bun link packages/cli
+git clone https://github.com/nikhilgupta58/argus.git
+cd argus && bun install
+cd packages/cli && bun link && cd ../..   # makes `argus` available globally
 
 # Create your first outcome contract (interactive)
 argus init
@@ -187,10 +188,9 @@ argus --version
 
 ```bash
 git clone https://github.com/nikhilgupta58/argus.git
-cd argus
-bun install
-bun run build
-bun link packages/cli          # makes `argus` available globally
+cd argus && bun install
+cd packages/cli && bun link    # makes `argus` available globally (no build step needed)
+argus --help
 ```
 
 Run the test suite:
