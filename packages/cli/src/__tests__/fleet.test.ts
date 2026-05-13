@@ -13,4 +13,9 @@ describe("fleetCommand", () => {
     expect(names).toContain("install");
     expect(names).toContain("remove");
   });
+
+  it("has an install-bundle subcommand", () => {
+    const names = fleetCommand.commands.map((c: { name(): string }) => c.name());
+    expect(names).toContain("install-bundle");
+  });
 });

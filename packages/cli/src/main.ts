@@ -8,6 +8,7 @@ import { fleetCommand } from "./commands/fleet.js";
 import { daemonCommand } from "./commands/daemon.js";
 import { publisherCommand } from "./commands/publisher.js";
 import { specialistPublishCommand } from "./commands/specialist-publish.js";
+import { marketplaceCommand } from "./commands/marketplace.js";
 
 const program = new Command();
 
@@ -23,5 +24,6 @@ program.addCommand(fleetCommand);
 program.addCommand(daemonCommand);
 program.addCommand(publisherCommand);
 program.addCommand(specialistPublishCommand);
+program.addCommand(marketplaceCommand);
 
 program.parse(process.argv);

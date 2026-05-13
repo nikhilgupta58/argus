@@ -82,8 +82,59 @@ const removeCmd = new Command("remove")
     console.log(pc.green(`Removed ${match.name}@${match.version}`));
   });
 
+const installBundleCmd = new Command("install-bundle")
+  .description("Install a specialist from a signed .tar.gz bundle (verifies signature and checks revocation)")
+  .argument("<bundle>", "Path to the .tar.gz bundle file")
+  .action(async (bundlePath: string) => {
+    const { readFileSync: readFS } = await import("node:fs");
+    const { blake3 } = await import("@noble/hashes/blake3");
+    const { bytesToHex } = await import("@noble/hashes/utils");
+    const { PublisherStore } = await import("@argus/core");
+    const { verifyBundle } = await import("../marketplace/verify.js");
+
+    const absPath = resolve(bundlePath);
+    if (!existsSync(absPath)) {
+      console.error(pc.red(`Bundle file not found: ${absPath}`));
+      process.exit(1);
+    }
+
+    const tarBytes = readFS(absPath);
+    const bundleHash = bytesToHex(
+      blake3(new Uint8Array(tarBytes.buffer, tarBytes.byteOffset, tarBytes.byteLength))
+    );
+
+    const dbPath = process.env["ARGUS_MARKETPLACE_DB"] ??
+      resolve(process.env["HOME"] ?? "~", ".argus", "marketplace.db");
+    const store = new PublisherStore(dbPath);
+    let isRevoked = false;
+    try {
+      isRevoked = store.isRevoked(bundleHash);
+    } finally {
+      store.close();
+    }
+
+    if (isRevoked) {
+      console.error(pc.red(`Bundle ${bundleHash.slice(0, 16)}... has been revoked and cannot be installed.`));
+      process.exit(1);
+    }
+
+    let manifest;
+    try {
+      manifest = await verifyBundle(absPath);
+    } catch (e) {
+      console.error(pc.red(`Bundle signature verification failed: ${(e as Error).message}`));
+      process.exit(1);
+    }
+
+    console.log(pc.green(`Signature verified for ${manifest.name}@${manifest.version}`));
+    console.log(`  publisher:  ${manifest.publisherIdentity.name} (${manifest.publisherIdentity.id})`);
+    console.log(`  bundleHash: ${bundleHash.slice(0, 16)}...`);
+    console.log(pc.dim("  (Verified bundle — install to local registry with argus fleet install <entrypoint>)"));
+  });
+
 export const fleetCommand = new Command("fleet")
   .description("Manage installed specialists")
   .addCommand(listCmd)
   .addCommand(installCmd)
-  .addCommand(removeCmd);
+  .addCommand(removeCmd)
+  .addCommand(installBundleCmd);
