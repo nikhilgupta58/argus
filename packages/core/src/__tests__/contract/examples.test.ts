@@ -1,9 +1,11 @@
 import { describe, it, expect } from "vitest";
 import { readFileSync } from "node:fs";
-import { join } from "node:path";
+import { join, dirname } from "node:path";
+import { fileURLToPath } from "node:url";
 import { parseContract } from "../../contract/parser.js";
 
-const EXAMPLES_DIR = join(import.meta.dir, "../../../../../examples/contracts");
+const __dirname = dirname(fileURLToPath(import.meta.url));
+const EXAMPLES_DIR = join(__dirname, "../../../../../examples/contracts");
 
 const EXAMPLES = [
   "outbound-3-demos.toml",

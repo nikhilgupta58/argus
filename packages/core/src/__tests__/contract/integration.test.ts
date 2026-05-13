@@ -1,11 +1,13 @@
 import { describe, it, expect, afterEach } from "vitest";
 import { readFileSync } from "node:fs";
-import { join } from "node:path";
+import { join, dirname } from "node:path";
+import { fileURLToPath } from "node:url";
 import { rmSync } from "node:fs";
 import { parseContract, contractHash, diffContracts, ContractStore } from "../../contract/index.js";
 
+const __dirname = dirname(fileURLToPath(import.meta.url));
 const DB_PATH = "/tmp/argus-integration-test.db";
-const EXAMPLES = join(import.meta.dir, "../../../../../examples/contracts");
+const EXAMPLES = join(__dirname, "../../../../../examples/contracts");
 
 afterEach(() => {
   try { rmSync(DB_PATH); } catch {}
