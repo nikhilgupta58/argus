@@ -1,0 +1,120 @@
+---
+title: Getting Started with Argus
+description: Five-minute quickstart — outcome-owning agents with signed lineage.
+---
+
+Argus is an open-source runtime for **outcome-owning AI agents**. Each agent runs under a signed **Outcome Contract** — a TOML document defining success criteria, budget, and escalation rules. Every action is recorded in a tamper-evident **lineage ledger** (Ed25519-signed, BLAKE3 content-addressed, independently replayable).
+
+## Prerequisites
+
+- [Bun](https://bun.sh) ≥ 1.1
+- Git
+
+## Five-Minute Quickstart
+
+### 1. Install the Argus CLI
+
+```bash
+bun add -g argus
+```
+
+Or, from source:
+
+```bash
+git clone https://github.com/nikhilgupta58/argus.git
+cd argus
+bun install
+bun link packages/cli
+```
+
+Verify:
+
+```bash
+argus --version
+# 0.1.0
+```
+
+### 2. Generate an agent key
+
+```bash
+argus keys generate myagent
+# Key saved to ~/.argus/myagent.key
+# Public key: ed25519:<hex>
+```
+
+The key file is XChaCha20-Poly1305 encrypted at rest (PBKDF2-SHA256, 600k iterations). Keep it safe.
+
+### 3. Create an Outcome Contract
+
+Copy the reference contract and edit it for your use case:
+
+```bash
+cp examples/contracts/outbound-3-demos.toml ./my-contract.toml
+```
+
+Edit `my-contract.toml`:
+
+```toml
+id = "my-first-contract"
+version = "1.0.0"
+kind = "outbound"
+owner = "you@example.com"
+outcome = "Land 3 qualified demo calls"
+deadline = "2025-12-31T00:00:00Z"
+
+[[success_criteria]]
+name = "demo_calls_booked"
+metric = "qualified_demo_calls"
+target = 3
+operator = "gte"
+measurement = "automatic"
+
+[budget]
+tokens = 500000
+usd = 10.00
+hard_cap = true
+
+[[escalation]]
+trigger = "budget > 80%"
+channel = "slack"
+contact = "#alerts"
+```
+
+Register the contract:
+
+```bash
+argus contract create ./my-contract.toml
+# Contract stored: my-first-contract@1.0.0
+```
+
+### 4. Install a specialist
+
+```bash
+argus fleet install ./packages/specialists/src/specialists/outbound/index.ts
+# Installed: outbound@1.0.0
+```
+
+### 5. Start the daemon
+
+```bash
+argus daemon start --key ~/.argus/myagent.key
+# Argus daemon running
+# Loaded 1 specialist(s)
+# Watching 1 contract(s)
+```
+
+### 6. Replay the lineage
+
+```bash
+argus lineage replay my-first-contract
+# seq=0 action=contract_created  id=<hash> signature=OK
+# seq=1 action=specialist_started id=<hash> signature=OK
+# Chain intact. 2 events.
+```
+
+## Next Steps
+
+- Read the [Contract DSL spec](/contract-spec) for all available fields.
+- Learn about the [Lineage format](/lineage-spec) and how tamper-evidence works.
+- Build your own agent with the [Specialist SDK](/specialist-sdk).
+- Understand the full system in the [Architecture overview](/architecture).
