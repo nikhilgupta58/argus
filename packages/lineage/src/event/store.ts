@@ -25,7 +25,6 @@ export class EventStore {
   constructor(path = ":memory:") {
     const resolvedPath = path === ":memory:" ? path : resolve(path);
     this.db = new Database(resolvedPath, { create: true });
-    this.db.run("PRAGMA journal_mode=WAL;");
     this.db.run(SCHEMA);
   }
 

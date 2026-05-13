@@ -37,7 +37,6 @@ export class PublisherStore {
   constructor(path = ":memory:") {
     const resolvedPath = path === ":memory:" ? path : resolve(path);
     this.db = new Database(resolvedPath, { create: true });
-    this.db.run("PRAGMA journal_mode=WAL;");
     this.db.run(SCHEMA_PUBLISHERS);
     this.db.run(SCHEMA_REVOCATIONS);
   }

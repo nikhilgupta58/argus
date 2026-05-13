@@ -11,7 +11,7 @@ import {
 import { Command } from "commander";
 import pc from "picocolors";
 
-const DB_PATH = process.env.ARGUS_DB ?? `${process.env.HOME}/.argus/argus.db`;
+const DB_PATH = process.env.ARGUS_LINEAGE_DB ?? `${process.env.HOME}/.argus/lineage.db`;
 const KEYS_DIR = process.env.ARGUS_KEYS_DIR ?? `${process.env.HOME}/.argus/keys`;
 
 function getStore(): EventStore {
@@ -41,8 +41,9 @@ lineageCommand
     const chain = store.getChain(contractId);
     store.close();
     if (chain.length === 0) {
-      console.error(pc.red(`No events found for contract: ${contractId}`));
-      process.exit(1);
+      console.log(pc.dim(`No events yet for contract: ${contractId}`));
+      console.log(pc.dim("  Events are recorded when the daemon runs this contract."));
+      return;
     }
     const state = replayChain(chain);
     console.log(pc.bold(`Replay: ${contractId}`));

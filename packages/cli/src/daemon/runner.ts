@@ -96,7 +96,15 @@ export class DaemonRunner {
       console.log(pc.cyan(`[daemon] scheduled ${contract.id} @ ${cronExpr}`));
     }
 
-    console.log(pc.green(`[daemon] started — ${this.cronJobs.length} contract(s) scheduled`));
+    if (this.cronJobs.length === 0) {
+      console.log(pc.yellow("[daemon] started — no contracts are scheduled to run automatically."));
+      console.log(
+        pc.dim('  To schedule a contract, add [metadata] cron = "0 9 * * *" to its TOML'),
+      );
+      console.log(pc.dim("  then run: argus contract edit <file>"));
+    } else {
+      console.log(pc.green(`[daemon] started — ${this.cronJobs.length} contract(s) scheduled`));
+    }
   }
 
   stop(): void {

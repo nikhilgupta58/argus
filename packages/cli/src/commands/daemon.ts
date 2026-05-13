@@ -1,12 +1,15 @@
+import { existsSync } from "node:fs";
 import { resolve } from "node:path";
 import { createInterface } from "node:readline";
 import { Command } from "commander";
 import pc from "picocolors";
 import { DaemonRunner } from "../daemon/runner.js";
 
-const DEFAULT_DB = resolve(process.env.HOME ?? "~", ".argus", "argus.db");
-const DEFAULT_LINEAGE_DB = resolve(process.env.HOME ?? "~", ".argus", "lineage.db");
-const DEFAULT_REGISTRY = resolve(process.env.HOME ?? "~", ".argus", "registry.json");
+const ARGUS_DIR = resolve(process.env.HOME ?? "~", ".argus");
+const DEFAULT_DB = process.env.ARGUS_DB ?? resolve(ARGUS_DIR, "argus.db");
+const DEFAULT_LINEAGE_DB = resolve(ARGUS_DIR, "lineage.db");
+const DEFAULT_REGISTRY = resolve(ARGUS_DIR, "registry.json");
+const DEFAULT_KEY = resolve(ARGUS_DIR, "keys", "default.key");
 
 const runner = new DaemonRunner();
 
@@ -48,7 +51,7 @@ const startCmd = new Command("start")
   .option("--db <path>", "Path to the contracts SQLite database", DEFAULT_DB)
   .option("--lineage-db <path>", "Path to the lineage SQLite database", DEFAULT_LINEAGE_DB)
   .option("--registry <path>", "Path to the specialist registry", DEFAULT_REGISTRY)
-  .option("--key <path>", "Path to the signing key file (required)")
+  .option("--key <path>", "Path to the signing key file", DEFAULT_KEY)
   .option(
     "--passphrase <passphrase>",
     "Passphrase for the signing key (omit to be prompted; prefer ARGUS_PASSPHRASE env var)",
@@ -61,8 +64,11 @@ const startCmd = new Command("start")
       key?: string;
       passphrase?: string;
     }) => {
-      if (!opts.key) {
-        console.error(pc.red("--key is required"));
+      if (!opts.key || !existsSync(opts.key)) {
+        console.error(pc.red(`Key file not found: ${opts.key ?? DEFAULT_KEY}`));
+        console.error(
+          pc.dim("  Run `argus keys generate default` to create one, or pass --key <path>"),
+        );
         process.exit(1);
       }
       let passphrase = process.env.ARGUS_PASSPHRASE ?? opts.passphrase;

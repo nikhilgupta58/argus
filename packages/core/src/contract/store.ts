@@ -1,5 +1,4 @@
 import { Database } from "bun:sqlite";
-import { rmSync } from "node:fs";
 import { resolve } from "node:path";
 import { contractHash } from "./hash.js";
 import type { Contract } from "./types.js";
@@ -32,16 +31,6 @@ export class ContractStore {
   constructor(path = ":memory:") {
     const resolvedPath = path === ":memory:" ? path : resolve(path);
     this.db = new Database(resolvedPath, { create: true });
-    this.db.run("PRAGMA journal_mode=WAL;");
-    // clean up stale WAL/SHM files from previous abnormal exits
-    if (resolvedPath !== ":memory:") {
-      try {
-        rmSync(`${resolvedPath}-wal`);
-      } catch {}
-      try {
-        rmSync(`${resolvedPath}-shm`);
-      } catch {}
-    }
     this.db.run(SCHEMA);
   }
 

@@ -8,11 +8,11 @@ describe("initCommand", () => {
   });
 
   it("has a description mentioning setup or wizard", () => {
-    expect(initCommand.description().toLowerCase()).toMatch(/setup|wizard|init/);
+    expect(initCommand.description().toLowerCase()).toMatch(/setup|wizard|init|agent/);
   });
 
-  it("has --out option", () => {
-    const opts = initCommand.options.map((o: { long: string }) => o.long);
-    expect(opts).toContain("--out");
+  it("has no required options (fully interactive)", () => {
+    const required = initCommand.options.filter((o: { required: boolean }) => o.required);
+    expect(required).toHaveLength(0);
   });
 });
