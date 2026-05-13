@@ -4,6 +4,7 @@
 
 [![License: Apache 2.0](https://img.shields.io/badge/License-Apache_2.0-blue.svg)](./LICENSE)
 [![CI](https://img.shields.io/github/actions/workflow/status/nikhilgupta58/argus/ci.yml?branch=main&label=CI)](https://github.com/nikhilgupta58/argus/actions)
+[![Release](https://img.shields.io/github/v/release/nikhilgupta58/argus?label=release)](https://github.com/nikhilgupta58/argus/releases/latest)
 
 Argus is an open-source runtime for outcome-owning AI agents. Each agent operates under a signed **Outcome Contract** that defines success criteria, budget, and escalation rules. Every action is recorded in a tamper-evident **lineage ledger** — Ed25519-signed, BLAKE3 content-addressed, and independently replayable. Argus agents compose into specialist fleets and run without any cloud dependency.
 
@@ -122,11 +123,23 @@ Key storage format (v2): `version(4) + PBKDF2_salt(32) + XChaCha20_nonce(24) + e
 | 2 | Lineage ledger + Ed25519 signing | ✅ Complete |
 | 3 | Fleet layer — specialist runtime, 3 reference specialists, initiative engine | ✅ Complete |
 | 4 | Marketplace — publisher identity, signed bundles, revocation | ✅ Complete |
-| 5 | Polish + Launch — docs site, release engineering, v0.1 ship | 📋 Planned |
+| 5 | Polish + Launch — docs site, release engineering, v0.1 ship | ✅ Complete |
 
 See [ARGUS_ROADMAP.md](./ARGUS_ROADMAP.md) for the full 12-week plan.
 
 ---
+
+## Install
+
+**Binary (recommended):**
+
+```bash
+bun add -g argus
+```
+
+Or download a pre-built binary from the [releases page](https://github.com/nikhilgupta58/argus/releases/latest):
+- `argus-macos-arm64` — macOS Apple Silicon
+- `argus-linux-x64` — Linux x86-64
 
 ## Install from Source
 
@@ -146,6 +159,15 @@ bun test
 ```
 
 ---
+
+## v0.1 Ship Criteria
+
+- [x] All 165 tests pass on CI
+- [x] Binary builds for macOS arm64 and Linux x64 via `bun build --compile`
+- [x] Quickstart docs at `packages/docs/`
+- [x] GitHub release workflow triggers on `v*` tags
+- [x] SECURITY.md lists `support@argus.dev`
+- [x] No open `priority:p0` issues
 
 ## Architecture
 
