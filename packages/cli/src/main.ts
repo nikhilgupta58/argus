@@ -6,6 +6,8 @@ import { keysCommand } from "./commands/keys.js";
 import { lineageCommand } from "./commands/lineage.js";
 import { fleetCommand } from "./commands/fleet.js";
 import { daemonCommand } from "./commands/daemon.js";
+import { publisherCommand } from "./commands/publisher.js";
+import { specialistPublishCommand } from "./commands/specialist-publish.js";
 
 const program = new Command();
 
@@ -19,5 +21,7 @@ program.addCommand(keysCommand);
 program.addCommand(lineageCommand);
 program.addCommand(fleetCommand);
 program.addCommand(daemonCommand);
+program.addCommand(publisherCommand);
+program.addCommand(specialistPublishCommand);
 
 program.parse(process.argv);
