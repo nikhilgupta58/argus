@@ -2,6 +2,7 @@
   "name": "@argus/cli",
   "version": "0.0.1",
   "private": true,
+  "main": "./dist/main.js",
   "bin": {
     "argus": "./dist/main.js"
   },
@@ -10,7 +11,9 @@
     "test": "vitest run"
   },
   "dependencies": {
-    "@argus/core": "workspace:*"
+    "@argus/core": "workspace:*",
+    "commander": "^12.1.0",
+    "picocolors": "^1.1.1"
   },
   "devDependencies": {
     "vitest": "^2.0.0",
