@@ -12,6 +12,7 @@
   },
   "dependencies": {
     "@argus/core": "workspace:*",
+    "@argus/lineage": "workspace:*",
     "commander": "^12.1.0",
     "picocolors": "^1.1.1"
   },
