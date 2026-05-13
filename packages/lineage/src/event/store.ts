@@ -1,6 +1,5 @@
 import { Database } from "bun:sqlite";
 import { resolve } from "node:path";
-import { rmSync } from "node:fs";
 import type { SignedEvent } from "./types.js";
 
 const SCHEMA = `
@@ -25,10 +24,6 @@ export class EventStore {
 
   constructor(path: string = ":memory:") {
     const resolvedPath = path === ":memory:" ? path : resolve(path);
-    if (resolvedPath !== ":memory:") {
-      try { rmSync(`${resolvedPath}-wal`); } catch {}
-      try { rmSync(`${resolvedPath}-shm`); } catch {}
-    }
     this.db = new Database(resolvedPath, { create: true });
     this.db.run("PRAGMA journal_mode=WAL;");
     this.db.run(SCHEMA);

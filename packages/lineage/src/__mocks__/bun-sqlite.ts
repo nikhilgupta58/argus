@@ -138,6 +138,8 @@ export class Database {
           }
 
           tableData.rows.push(row);
+        } else if (type === "UNKNOWN") {
+          throw new SQLiteError(`Mock: unsupported statement type: ${sql}`);
         }
       },
 
