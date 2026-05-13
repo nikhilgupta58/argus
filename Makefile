@@ -2,11 +2,11 @@
 
 dist-local:
 	mkdir -p dist
-	bun build packages/cli/src/main.ts --compile --outfile dist/argus
+	cd packages/cli && bun build src/main.ts --compile --outfile ../../dist/argus
 	@echo "Binary at dist/argus"
 
 install-local:
-	bun build packages/cli/src/main.ts --compile --outfile ~/.bun/bin/argus
+	cd packages/cli && bun build src/main.ts --compile --outfile ~/.bun/bin/argus
 	@echo "Installed: argus -> ~/.bun/bin/argus"
 
 test:
