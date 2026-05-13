@@ -55,6 +55,26 @@ Ed25519-signed event chain with XChaCha20-Poly1305 key encryption, PBKDF2-SHA256
 ### Phase 3 — Fleet Layer ✅
 Content-addressed specialist runtime, cron/webhook initiative engine, budget enforcement, and human-in-the-loop escalation.
 
+### Phase 4 — Marketplace + Trust ✅
+Publisher identity (Ed25519 keypair, local registry), signed specialist bundles (`.tar.gz` + Ed25519 over BLAKE3 manifest), revocation list (SQLite), and a minimal static Astro discovery site.
+
+```bash
+# Register a publisher identity
+argus publisher register --name "My Org"
+
+# Pack and sign a specialist directory
+argus specialist publish ./packages/specialists/src/specialists/outbound \
+  --publisher pub-<id>
+
+# Install a verified bundle (signature + revocation check)
+argus fleet install-bundle outbound-1.0.0.tar.gz
+
+# Revoke a bundle by hash
+argus marketplace revoke <bundleHash> --reason "security issue"
+```
+
+Publisher key format: same XChaCha20-Poly1305 + PBKDF2-SHA256 (600k iterations) as lineage keys. Bundle manifests carry an Ed25519 signature over `BLAKE3(canonical JSON of manifest without signature field)`. Every `install-bundle` call verifies the signature and checks the BLAKE3 bundle hash against the revocation list before any code runs.
+
 ```bash
 # Manage specialists (content-addressed by BLAKE3 manifest hash)
 argus fleet list
@@ -101,8 +121,8 @@ Key storage format (v2): `version(4) + PBKDF2_salt(32) + XChaCha20_nonce(24) + e
 | 1 | Contract DSL + SQLite store | ✅ Complete |
 | 2 | Lineage ledger + Ed25519 signing | ✅ Complete |
 | 3 | Fleet layer — specialist runtime, 3 reference specialists, initiative engine | ✅ Complete |
-| 4 | Marketplace — publisher identity, content-addressed packages | 📋 Planned |
-| 5 | Cloud-optional relay, multi-tenant isolation | 📋 Planned |
+| 4 | Marketplace — publisher identity, signed bundles, revocation | ✅ Complete |
+| 5 | Polish + Launch — docs site, release engineering, v0.1 ship | 📋 Planned |
 
 See [ARGUS_ROADMAP.md](./ARGUS_ROADMAP.md) for the full 12-week plan.
 
