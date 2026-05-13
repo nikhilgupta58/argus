@@ -1,5 +1,6 @@
 import { existsSync, mkdirSync, readFileSync, writeFileSync } from "node:fs";
 import { basename, resolve } from "node:path";
+import { createInterface } from "node:readline";
 import { decryptKeyPair, encryptKeyPair, generateKeyPair, keyPairToHex } from "@argus/lineage";
 import { Command } from "commander";
 import pc from "picocolors";
@@ -27,19 +28,67 @@ function ensureKeysDir(): void {
   if (!existsSync(KEYS_DIR)) mkdirSync(KEYS_DIR, { recursive: true });
 }
 
+async function promptPassphrase(confirm = false): Promise<string> {
+  const rl = createInterface({ input: process.stdin, output: process.stderr });
+  const ask = (q: string): Promise<string> =>
+    new Promise((resolve) => {
+      process.stderr.write(q);
+      // Disable echo if TTY
+      if ((process.stdin as NodeJS.ReadStream).isTTY) {
+        (process.stdin as NodeJS.ReadStream).setRawMode(true);
+        let buf = "";
+        process.stdin.setEncoding("utf8");
+        const onData = (ch: string) => {
+          if (ch === "\r" || ch === "\n") {
+            process.stdin.removeListener("data", onData);
+            (process.stdin as NodeJS.ReadStream).setRawMode(false);
+            process.stderr.write("\n");
+            resolve(buf);
+          } else if (ch === "") {
+            process.exit(1);
+          } else if (ch === "") {
+            buf = buf.slice(0, -1);
+          } else {
+            buf += ch;
+          }
+        };
+        process.stdin.on("data", onData);
+        process.stdin.resume();
+      } else {
+        rl.question("", (ans) => {
+          rl.close();
+          resolve(ans);
+        });
+      }
+    });
+
+  const pass = await ask("Passphrase (hidden): ");
+  if (confirm) {
+    const pass2 = await ask("Confirm passphrase: ");
+    if (pass !== pass2) {
+      console.error(pc.red("Passphrases do not match."));
+      process.exit(1);
+    }
+  }
+  rl.close();
+  if (!pass) {
+    console.error(pc.red("Passphrase cannot be empty."));
+    process.exit(1);
+  }
+  return pass;
+}
+
 export const keysCommand = new Command("keys").description("Manage signing keys");
 
 keysCommand
   .command("generate [tenant]")
   .description("Generate a new Ed25519 signing key pair")
-  .option("--passphrase <pass>", "Encryption passphrase (use env ARGUS_PASSPHRASE in production)")
-  .action((tenant: string, opts: { passphrase?: string }) => {
-    const passphrase = opts.passphrase ?? process.env.ARGUS_PASSPHRASE;
+  .option("--passphrase <pass>", "Encryption passphrase (omit to be prompted)")
+  .action(async (tenant, opts: { passphrase?: string }) => {
+    let passphrase = opts.passphrase ?? process.env.ARGUS_PASSPHRASE;
     if (!passphrase) {
-      console.error(pc.red("Error: --passphrase required (or set ARGUS_PASSPHRASE env var)"));
-      process.exit(1);
-    }
-    if (opts.passphrase) {
+      passphrase = await promptPassphrase(true);
+    } else if (opts.passphrase) {
       console.warn(
         pc.yellow(
           "  Warning: passing --passphrase on the command line may expose it in shell history. Prefer ARGUS_PASSPHRASE env var.",
@@ -65,14 +114,12 @@ keysCommand
 keysCommand
   .command("rotate [tenant]")
   .description("Generate a new key pair, archiving the old one")
-  .option("--passphrase <pass>", "Passphrase for new key")
-  .action((tenant: string, opts: { passphrase?: string }) => {
-    const passphrase = opts.passphrase ?? process.env.ARGUS_PASSPHRASE;
+  .option("--passphrase <pass>", "Passphrase for new key (omit to be prompted)")
+  .action(async (tenant, opts: { passphrase?: string }) => {
+    let passphrase = opts.passphrase ?? process.env.ARGUS_PASSPHRASE;
     if (!passphrase) {
-      console.error(pc.red("Error: --passphrase required"));
-      process.exit(1);
-    }
-    if (opts.passphrase) {
+      passphrase = await promptPassphrase(true);
+    } else if (opts.passphrase) {
       console.warn(
         pc.yellow(
           "  Warning: passing --passphrase on the command line may expose it in shell history. Prefer ARGUS_PASSPHRASE env var.",

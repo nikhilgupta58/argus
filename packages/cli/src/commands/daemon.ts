@@ -1,4 +1,5 @@
 import { resolve } from "node:path";
+import { createInterface } from "node:readline";
 import { Command } from "commander";
 import pc from "picocolors";
 import { DaemonRunner } from "../daemon/runner.js";
@@ -9,6 +10,39 @@ const DEFAULT_REGISTRY = resolve(process.env.HOME ?? "~", ".argus", "registry.js
 
 const runner = new DaemonRunner();
 
+async function promptPassphrase(): Promise<string> {
+  return new Promise((resolve) => {
+    process.stderr.write("Key passphrase (hidden): ");
+    if ((process.stdin as NodeJS.ReadStream).isTTY) {
+      (process.stdin as NodeJS.ReadStream).setRawMode(true);
+      let buf = "";
+      process.stdin.setEncoding("utf8");
+      const onData = (ch: string) => {
+        if (ch === "\r" || ch === "\n") {
+          process.stdin.removeListener("data", onData);
+          (process.stdin as NodeJS.ReadStream).setRawMode(false);
+          process.stderr.write("\n");
+          resolve(buf);
+        } else if (ch === "") {
+          process.exit(1);
+        } else if (ch === "") {
+          buf = buf.slice(0, -1);
+        } else {
+          buf += ch;
+        }
+      };
+      process.stdin.on("data", onData);
+      process.stdin.resume();
+    } else {
+      const rl = createInterface({ input: process.stdin });
+      rl.question("", (ans) => {
+        rl.close();
+        resolve(ans);
+      });
+    }
+  });
+}
+
 const startCmd = new Command("start")
   .description("Start the Argus daemon (cron scheduler)")
   .option("--db <path>", "Path to the contracts SQLite database", DEFAULT_DB)
@@ -17,7 +51,7 @@ const startCmd = new Command("start")
   .option("--key <path>", "Path to the signing key file (required)")
   .option(
     "--passphrase <passphrase>",
-    "Passphrase for the signing key (prefer ARGUS_PASSPHRASE env var)",
+    "Passphrase for the signing key (omit to be prompted; prefer ARGUS_PASSPHRASE env var)",
   )
   .action(
     async (opts: {
@@ -31,12 +65,10 @@ const startCmd = new Command("start")
         console.error(pc.red("--key is required"));
         process.exit(1);
       }
-      const passphrase = process.env.ARGUS_PASSPHRASE ?? opts.passphrase ?? "";
+      let passphrase = process.env.ARGUS_PASSPHRASE ?? opts.passphrase;
       if (!passphrase) {
-        console.error(pc.red("--passphrase or ARGUS_PASSPHRASE env var is required"));
-        process.exit(1);
-      }
-      if (opts.passphrase) {
+        passphrase = await promptPassphrase();
+      } else if (opts.passphrase) {
         console.warn(
           pc.yellow(
             "Warning: passing --passphrase on the command line may expose it in shell history. Use ARGUS_PASSPHRASE env var instead.",
